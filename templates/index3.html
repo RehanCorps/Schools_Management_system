@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Add Student</title>
+</head>
+<body>
+    <h2>Test Add Student</h2>
+
+    <input type="text" id="studentName" placeholder="Name">
+    <input type="text" id="addstudentclass" placeholder="Class" value="10">
+    <input type="text" id="section" placeholder="Section">
+    <input type="text" id="rollNumber" placeholder="Roll Number">
+    <input type="text" id="fatherName" placeholder="Father Name">
+    <input type="text" id="phone" placeholder="Phone">
+    <input type="text" id="whatsapp" placeholder="WhatsApp">
+
+    <button type="button" onclick="addStudent()">Add Student</button>
+
+    <div id="result"></div>
+
+    <script>
+        function addStudent() {
+            const student = {
+                name: document.getElementById("studentName").value.trim(),
+                class_name: document.getElementById("addstudentclass").value.trim(),
+                section: document.getElementById("section").value.trim(),
+                roll_number: document.getElementById("rollNumber").value.trim(),
+                fatherName: document.getElementById("fatherName").value.trim(),
+                phone: document.getElementById("phone").value.trim(),
+                whatsapp: document.getElementById("whatsapp").value.trim()
+            };
+
+            if (!student.name || !student.class_name || !student.section || !student.roll_number) {
+                alert("Fill all required fields!");
+                return;
+            }
+
+            fetch("http://127.0.0.1:5000/students", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(student)
+            })
+            .then(async response => {
+                let data = {};
+                try { data = await response.json(); } catch {}
+                document.getElementById("result").innerText = 
+                    response.ok ? `Success: ${data.message}` : `Error: ${data.message || "Failed"}`;
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById("result").innerText = "Server error";
+            });
+        }
+    </script>
+</body>
+</html>
