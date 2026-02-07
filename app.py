@@ -1,6 +1,7 @@
+from database import get_connection
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
-from services import add_student, get_students, get_student, update_student, delete_student
+from services import add_student, get_students, get_student, update_student, delete_student, add_fee
 app = Flask(__name__)
 
 CORS(app)
@@ -65,10 +66,26 @@ def remove_student(class_name, roll_number):
     return jsonify({"status": "success"}), 200
 
 
+# ------------------------------
+# fee management
+
+@app.route('/add-fee-payment', methods=['POST'])
+def showdata():
+    data=request.get_json()
+    response= add_fee(data)
+    
+    if not response  :
+        return jsonify({"error": "Student not found"}), 404
+    else:
+        return jsonify({"status": "success"}), 200  
+    
+    
+
+
 
 @app.route('/')
 def render_page():
-    return render_template("index(2).html")
+    return render_template("index.html")
 
 
 if __name__=="__main__":
