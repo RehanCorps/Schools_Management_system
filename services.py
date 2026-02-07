@@ -5,11 +5,10 @@ import traceback
 def roll_exists(class_name, roll_number):
     conn=get_connection()
     cursor=conn.cursor()
-    cursor.execute("SELECT * FROM enrollments WHERE class_name = ? AND roll_number = ? ", (class_name, roll_number))
+    cursor.execute("SELECT * FROM enrollments WHERE class_name = ? AND roll_number = ? AND status = ?", (class_name, roll_number, "active"))
 
     row= cursor.fetchone()
     conn.close()
-    # print("FOUND ROW:", row)
     return row is not None
 
 def get_enroll_id(class_name, roll_number):
@@ -143,6 +142,8 @@ def update_student(class_name, roll_number, data):
     return {"success": "Student updated"}
 
 # fee management functions 
+
+
 def get_due(data, id):
 
     class_name= data.get("class_name")
@@ -188,13 +189,33 @@ def add_fee(data):
         conn = get_connection()
         cursor = conn.cursor()
         enroll_id= get_enroll_id(data.get("class_name"), data.get("roll_number"))
-        last_data= month(data, enroll_id)
-        month=last_data[]
-        print(month_exist)
-        method="cash"
-        cursor.execute("""
-            INSERT INTO fee_records (enrollment_id,  amount, month, paid_on, method)
-            VALUES (?, ?, ?, ?, ?)
+        
+        month_check= cursor.execute("""SELECT SUM(amount) FROM fee_records WHERE enrollment_id = ? AND month =?""", (enroll_id, data.get("month"))).fetchone()
+        if month_check[0] is None:
+            last_due= month(data, enroll_id)
+            total_fee=cursor.execute("SELECT total_fee FROM enrollments WHERE class_name = ? AND roll_number= ?", (data.get("class_name"), data.get("roll_number"))).fetchone()
+            current_due=int(last_due["dues"])+int(total_fee[0])
+            dues_with_payment=current_due- int(data.get("amount"))
+            method="cash"
+            cursor.execute("""
+                INSERT INTO fee_records (enrollment_id,  amount, month, paid_on, method, dues)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (
+            enroll_id,
+            data.get("amount"),
+            data["month"],
+            data.get("paid_on"),
+            method,
+            dues_with_payment
+            ))
+            conn.commit()
+            conn.close()
+        else:
+        
+            method="cash"
+            cursor.execute("""
+                INSERT INTO fee_records (enrollment_id,  amount, month, paid_on, method)
+                VALUES (?, ?, ?, ?, ?)
             """, (
             enroll_id,
             data.get("amount"),
@@ -203,21 +224,19 @@ def add_fee(data):
             method
             ))
         
-        id=cursor.lastrowid
+            id=cursor.lastrowid
         
-        conn.commit()
-        conn.close()
-        get_due(data, id)
+            conn.commit()
+            conn.close()
+            get_due(data, id)
         
-        print(id)
-  
         
         return "okay", 200
     # ---------------------------------
 
     
 if __name__=="__main__":
-    data = {'name': 'Rehan', 'class_name': '10', 'section': 'A', 'roll_number': '123', 'month': 'march', 'amount': '500', 'paid_on': '04/12/2026'}
+    data = {'name': 'Rehan', 'class_name': '10', 'section': 'A', 'roll_number': '101', 'month': 'april', 'amount': '1000', 'paid_on': '04/12/2026'}
     enroll_id="1"
     result= add_fee(data)
     print(result)
