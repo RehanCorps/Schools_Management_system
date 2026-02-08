@@ -235,10 +235,10 @@ def add_fee(data):
     # ---------------------------------
 
     
-if __name__=="__main__":
-    data = {'name': 'Rehan', 'class_name': '10', 'section': 'A', 'roll_number': '101', 'month': 'april', 'amount': '1000', 'paid_on': '04/12/2026'}
-    enroll_id="1"
-    result= add_fee(data)
-    print(result)
+# if __name__=="__main__":
+#     data = {'name': 'Rehan', 'class_name': '10', 'section': 'A', 'roll_number': '101', 'month': 'april', 'amount': '1000', 'paid_on': '04/12/2026'}
+#     enroll_id="1"
+#     result= add_fee(data)
+#     print(result)
 
 
