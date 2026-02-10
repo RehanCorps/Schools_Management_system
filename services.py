@@ -27,11 +27,35 @@ def month(data, enroll_id):
     last_data=cursor.execute("SELECT month, dues FROM fee_records WHERE enrollment_id =? ORDER BY id DESC LIMIT 1", (enroll_id_value)).fetchone()
     return dict(last_data)
     
+def add_enrollments(data, id):
+
+    conn=get_connection()
+    cursor=conn.cursor()
+
+    cursor.execute("""
+        INSERT INTO enrollments (student_id, class_name, section, roll_number, total_fee, status, session_year)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (
+        id,
+        data.get("class_name"),
+        data.get("section"),
+        data.get("roll_number"),
+        data.get("total_fee"),
+        "active",
+        data.get("session")
+        ))
+
+    conn.commit()
+    conn.close()
+
+    return True
+
+    
+
+
 
 
 def add_student(data):
-
-    print("CHECKING:", data.get("class_name"), data.get("roll_number"))
 
 
     if roll_exists(data.get("class_name"), data.get("roll_number")):
@@ -41,32 +65,47 @@ def add_student(data):
         cursor = conn.cursor()
 
         cursor.execute("""
-        INSERT INTO students_record (name, class_name, section, father, parent_contact, roll_number)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO students_record (full_name, father_name, dob, gender)
+        VALUES (?, ?, ?, ?)
         """, (
         data["name"],
-        data.get("class_name"),
-        data["section"],
         data.get("father"),
-        data.get("phone"),
-        data.get("roll_number")
+        data["dob"],
+        data.get("gender"),
         ))
 
         conn.commit()
         conn.close()
+
+        id=cursor.lastrowid
+
+        enrollments_details_add= add_enrollments(data, id)
+
         traceback.print_stack(limit=5)
         return {"success": True, "message": "Roll Doesnt exists"}, 200
   
 
 
 def get_students(class_name):
+
+
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM students_record WHERE class_name = ?", (class_name,))
-    rows = cursor.fetchall()
-
+    students_data= cursor.execute("""
+    SELECT
+    sr.full_name,
+    sr.father_name,
+    sr.dob,
+    sr.gender,
+    e.section,
+    e.roll_number,
+    e.class_name
+    FROM enrollments e
+    INNER JOIN students_record sr
+    ON e.student_id = sr.id
+    WHERE e.class_name = ?""", (class_name,)).fetchall()
     conn.close()
-    return [dict(row) for row in rows]
+    return [dict(row) for row in students_data]
 
 def get_student(class_name, roll_number):
     conn = get_connection()
@@ -235,10 +274,10 @@ def add_fee(data):
     # ---------------------------------
 
     
-# if __name__=="__main__":
-#     data = {'name': 'Rehan', 'class_name': '10', 'section': 'A', 'roll_number': '101', 'month': 'april', 'amount': '1000', 'paid_on': '04/12/2026'}
-#     enroll_id="1"
-#     result= add_fee(data)
-#     print(result)
+if __name__=="__main__":
+    data = {'class_name': '10'}
+    enroll_id="1"
+    result= get_students(data)
+    print(result)
 
 

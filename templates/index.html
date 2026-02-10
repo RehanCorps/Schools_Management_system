@@ -82,7 +82,19 @@
                         <input type="text" id="studentName" placeholder="Student Name" style="margin:5px 0;">
                     </label>
 
-                    <label style="font-size:16px;">Class
+                    <label style="font-size:16px;">Date of Birth
+                        <input type="date" id="studentDOB" style="margin:5px 0;">
+                    </label>
+
+                    <label style="font-size:16px;">Gender
+                        <select id="studentGender" required style="margin:5px 0;">
+                            <option value="male">🚹Male</option>
+                            <option value="female">🚺Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </label>
+
+                    <label id="classheading" style="font-size:16px;">Class
                         <select id="addstudentclass" required style="margin:5px 0;">
                             <option value="9">9</option>
                             <option value="10">10</option>
@@ -93,8 +105,16 @@
                         <input type="text" id="section" placeholder="e.g., A" style="margin:5px 0;">
                     </label>
 
-                    <label style="font-size:16px;">Roll Number
+                    <label id="rollheading" style="font-size:16px;">Roll Number
                         <input type="text" id="rollNumber" placeholder="e.g., A-123" style="margin:5px 0;">
+                    </label>
+
+                    <label style="font-size:16px;">Session
+                        <input type="text" id="session" placeholder="e.g., 2024-25" style="margin:5px 0;">
+                    </label>
+
+                    <label style="font-size:16px;">Total Fee
+                        <input type="number" id="totalFee" placeholder="e.g., 2000" style="margin:5px 0;">
                     </label>
                 </div>
 
@@ -184,8 +204,8 @@
                             <th>Class</th>
                             <th>Section</th>
                             <th>Roll number</th>
+                            <th>Gender</th>
                             <th>Father/Gaurdian</th>
-                            <th>Phone</th>
                             <th style="display: flex; align-items: center; justify-content: center; ">Actions</th>
                         </tr>
                     </thead>
