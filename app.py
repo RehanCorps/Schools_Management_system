@@ -62,6 +62,7 @@ def modify_student(class_name, roll_number):
 @app.route('/students/<class_name>/<roll_number>', methods=['DELETE'])
 def remove_student(class_name, roll_number):
     success = delete_student(class_name, roll_number)
+
     if not success:
         return jsonify({"error": "Student not found"}), 404
     return jsonify({"status": "success"}), 200

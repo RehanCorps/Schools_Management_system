@@ -82,7 +82,7 @@ function addStudent() {
 // Delete student 
 // -----------------------------------
 
-let pendingDeleteData = null;
+var pendingDeleteData = null;
 
 function openConfirm() {
     const class_name = document.getElementById("deletestudentclass").value;
@@ -97,7 +97,7 @@ function openConfirm() {
 
 
 
-    pendingDeleteData = { "class": class_name, "rollNumber": roll_number };
+    pendingDeleteData = { "class": class_name, "rollnumber": roll_number };
     document.getElementById("confirmModal").classList.add("show");
 }
 
@@ -109,7 +109,7 @@ function closeConfirm() {
 function confirmDelete() {
     if (!pendingDeleteData) return;
 
-    const webhookUrl = `http://127.0.0.1:5000/students/${pendingDeleteData.class}/${pendingDeleteData.rollNumber}`;
+    const webhookUrl = `http://127.0.0.1:5000/students/${pendingDeleteData.class}/${pendingDeleteData.rollnumber}`;
     ;
 
     fetch(webhookUrl, {
@@ -193,10 +193,9 @@ function renderStudents() {
         tbody.innerHTML = `<tr><td colspan="7">No students found</td></tr>`;
         return;
     }
-
     students.forEach((s, index) => {
-     const row = document.createElement("tr");
-                const student_id = `${s.class_name}-${s.roll_number}`;
+        const row = document.createElement("tr");
+                
     row.innerHTML = `
     <td>${s.full_name }</td>
     <td>${s.class_name }</td>
@@ -204,6 +203,7 @@ function renderStudents() {
     <td>${s.roll_number}</td>
     <td>${s.gender.toUpperCase()}</td>
     <td>${s.father_name}</td>
+   
          <td>
            <button type="button" class="btn btn-primary" onclick="startUpdate(${index})">Edit</button>
            <button type="button" class="btn btn-primary" style="background: red;" onclick="delete_students(${index})">Delete</button>
@@ -246,20 +246,20 @@ function delete_students(index) {
 
 
 // updating start button ---------
-function startUpdate(index) { // Assuming 'index' is passed as an argument
-    let editingIndex; // Declare editingIndex here
+function startUpdate(index) { 
+    
     editingIndex = index;
     const s = students[index];
+    
 
     document.getElementById("studentName").value = s.full_name;
-    
     document.getElementById("section").value = s.section;
     document.getElementById("fatherName").value = s.father_name;
-    document.getElementById("section").value = s.section;
     document.getElementById("studentDOB").value = s.dob;
+    document.getElementById("session").value=s.total_fee;
 
 
-document.getElementById("addstudentclass").style.display= "none";
+    document.getElementById("addstudentclass").style.display= "none";
     document.getElementById("rollNumber").style.display = "none";
     document.getElementById("classheading").style.display = "none";
     document.getElementById("rollheading").style.display = "none";
@@ -333,6 +333,8 @@ function resetFormState() {
     document.getElementById("rollNumber").value = "";
     document.getElementById("fatherName").value = "";
     document.getElementById("phone").value = "";
+    document.getElementById("studentDOB").value = "";
+
 
     document.getElementById("updateBtn").style.display = "none";
     document.getElementById("cancelBtn").style.display = "none";
@@ -401,16 +403,15 @@ function canceldelete() {
 
 function addfee() {
     const data = {
-        name: document.getElementById("studentNameforfee").value,
         class_name: document.getElementById("classforfee").value,
         section: document.getElementById("Sectionforfee").value,
         roll_number: document.getElementById("Rollnumberforfee").value,
-        date: document.getElementById("feedate").value,
+        paid_on: document.getElementById("feedate").value,
         month: document.getElementById('feemonth').value,
         amount: document.getElementById('amount').value,
     };
 
-    if (!data.name || !data.roll_number || !data.class_name || !data.section || !data.month || !data.amount) {
+    if (!data.name || !data.roll_number || !data.class_name || !data.section || !data.paid_on || !data.month || !data.amount) {
         showToast("Fill the fields first", "notify")
         return;
     }
@@ -429,7 +430,7 @@ function addfee() {
                 return null;
             }
             if (!res.ok) {
-                showToast("Invalid info", "error");
+                showToast("database error", "error");
                 return null;
             }
             return res.text(); // ← safe even if empty
@@ -438,7 +439,7 @@ function addfee() {
             if (data === null) return;
             showToast("Record Added successfully");
             reset_fee_form();
-            fetchfeedetails(data)
+            // fetchfeedetails(data)
         })
         .catch(err => {
             console.error(err);

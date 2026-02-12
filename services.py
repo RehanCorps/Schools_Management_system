@@ -20,11 +20,25 @@ def get_enroll_id(class_name, roll_number):
     enrollment_id=id[0]
     return enrollment_id
 
+
+def get_student_id(class_name, roll_number):
+    conn=get_connection()
+    cursor=conn.cursor()
+    id=cursor.execute("SELECT student_id FROM enrollments WHERE class_name = ? AND roll_number = ? ", (class_name, roll_number)).fetchone()
+    conn.close
+    if id==None:
+        return False
+    else:
+        student_id=id[0]
+        return student_id
+
 def month(data, enroll_id):
     conn=get_connection()
     cursor=conn.cursor()
     enroll_id_value=f"{enroll_id}"
     last_data=cursor.execute("SELECT month, dues FROM fee_records WHERE enrollment_id =? ORDER BY id DESC LIMIT 1", (enroll_id_value)).fetchone()
+    if last_data==None:
+        return "New entry"
     return dict(last_data)
     
 def add_enrollments(data, id):
@@ -81,7 +95,6 @@ def add_student(data):
 
         enrollments_details_add= add_enrollments(data, id)
 
-        traceback.print_stack(limit=5)
         return {"success": True, "message": "Roll Doesnt exists"}, 200
   
 
@@ -110,24 +123,47 @@ def get_students(class_name):
 def get_student(class_name, roll_number):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM students_record WHERE class_name = ? AND roll_number = ?", (class_name, roll_number))
-    rows = cursor.fetchall()
-
+    students_data= cursor.execute("""
+    SELECT
+    sr.full_name,
+    sr.father_name,
+    sr.dob,
+    sr.gender,
+    e.section,
+    e.roll_number,
+    e.class_name
+    FROM enrollments e
+    INNER JOIN students_record sr
+    ON e.student_id = sr.id
+    WHERE e.class_name = ? AND roll_number=?""", (class_name, roll_number)).fetchall()
     conn.close()
-    return [dict(row) for row in rows]
+
+    return [dict(row) for row in students_data]
 
 
 def delete_student(class_name, roll_number):
+
+    id = get_student_id(class_name, roll_number)
+    
+    if not id:
+        return False
+    
+    
+    id_value=str(id)
     conn=get_connection()
-    cursor=conn.cursor()
-    cursor.execute( "DELETE FROM students_record WHERE class_name = ? AND roll_number =?", (class_name, roll_number) )
+    try:
+        cursor=conn.cursor()
+        cursor.execute("DELETE FROM enrollments WHERE student_id=?", (id_value))
+        cursor.execute("DELETE FROM students_record WHERE id=?", (id_value))
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        return "ERROR", e
+    finally:
+        affected_rows=cursor.rowcount
 
-    affected_rows=cursor.rowcount
-
-    conn.commit()
-    conn.close()
-
-    return affected_rows > 0
+        conn.close()
+        return affected_rows > 0
 
 
 
@@ -231,9 +267,14 @@ def add_fee(data):
         
         month_check= cursor.execute("""SELECT SUM(amount) FROM fee_records WHERE enrollment_id = ? AND month =?""", (enroll_id, data.get("month"))).fetchone()
         if month_check[0] is None:
-            last_due= month(data, enroll_id)
             total_fee=cursor.execute("SELECT total_fee FROM enrollments WHERE class_name = ? AND roll_number= ?", (data.get("class_name"), data.get("roll_number"))).fetchone()
-            current_due=int(last_due["dues"])+int(total_fee[0])
+            last_due= month(data, enroll_id)
+            if last_due=="New entry":
+                current_due=int(total_fee[0])
+            else:
+                current_due=int(last_due["dues"])+int(total_fee[0])
+                
+            
             dues_with_payment=current_due- int(data.get("amount"))
             method="cash"
             cursor.execute("""
@@ -275,9 +316,9 @@ def add_fee(data):
 
     
 if __name__=="__main__":
-    data = {'class_name': '10'}
+    data = {'class_name': '9', 'roll_number': '102', 'full_name': 'REHAN', 'amount':'500', 'month':'january' }
     enroll_id="1"
-    result= get_students(data)
+    result= add_fee(data)
     print(result)
 
 
