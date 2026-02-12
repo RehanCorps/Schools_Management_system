@@ -22,13 +22,14 @@ def create_student():
 # get student func 
 @app.route('/students/<class_name>', methods=['GET'])
 def read_students(class_name):
-    students = get_students(class_name)
-    return jsonify(students), 200
+    students_details = get_students(class_name)
+    return jsonify(students_details), 200
 
 @app.route('/student/<class_name>/<roll_number>', methods=['GET'])
 def read_student(class_name, roll_number):
     students = get_student(class_name, roll_number)
     return jsonify(students), 200
+
 
 
 
