@@ -1,5 +1,7 @@
 from database import get_connection
 import traceback
+from flask import jsonify 
+
 
 
 def roll_exists(class_name, roll_number):
@@ -314,11 +316,33 @@ def add_fee(data):
         return "okay", 200
     # ---------------------------------
 
+    # fee details fetch
+
+def fee_details(data):
+
+    conn=get_connection()
+    cursor=conn.cursor()
+    rollnumber=data.get('roll_number')
+    class_=data.get('class_name')
+    month=data.get('month')
+    enroll_id=get_enroll_id(class_, rollnumber)
+
+    student_fee_data=cursor.execute("""SELECT * FROM fee_records WHERE enrollment_id=? AND month=?""", (enroll_id, month)).fetchall()
+    conn.commit()
+    conn.close
+    if data==None:
+        return "Not found", False
+
+    return [dict(row) for row in student_fee_data]
+
+
+
+
     
 if __name__=="__main__":
-    data = {'class_name': '9', 'roll_number': '102', 'full_name': 'REHAN', 'amount':'500', 'month':'january' }
+    data = {'class_name': '9', 'roll_number': '100', 'full_name': 'REHAN', 'amount':'500', 'month':'may' }
     enroll_id="1"
-    result= add_fee(data)
+    result= fee_details(data)
     print(result)
 
 

@@ -1,7 +1,7 @@
 from database import get_connection
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
-from services import add_student, get_students, get_student, update_student, delete_student, add_fee
+from services import add_student, get_students, get_student, update_student, delete_student, add_fee, fee_details
 app = Flask(__name__)
 
 CORS(app)
@@ -81,6 +81,17 @@ def showdata():
     else:
         return jsonify({"status": "success"}), 200  
     
+# render fee details function
+
+@app.route('/feedetails', methods=['GET'])
+def fetch_fee_details():
+    data=request.json()
+    response=fee_details(data)
+    if not response  :
+        return jsonify({"error": "Student not found"}), 404
+    else:
+        return jsonify(response), 200  
+
     
 
 

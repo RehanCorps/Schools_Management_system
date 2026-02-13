@@ -374,9 +374,6 @@ function cancelUpdate() {
     document.getElementById("classheading").style.display = "inline-block";
     document.getElementById("rollheading").style.display = "inline-block";
 
-
-
-
     showToast("Update cancelled", "notify");
 }
 
@@ -390,7 +387,6 @@ function canceldelete() {
 
     document.getElementById("canceldeleteBtn").style.display = "none";
     document.getElementById("deletestudentscard").style.border = "none";
-
 
     showToast("Delete cancelled", "notify");
 }
@@ -411,7 +407,7 @@ function addfee() {
         amount: document.getElementById('amount').value,
     };
 
-    if (!data.name || !data.roll_number || !data.class_name || !data.section || !data.paid_on || !data.month || !data.amount) {
+    if ( !data.roll_number || !data.class_name || !data.section || !data.paid_on || !data.month || !data.amount) {
         showToast("Fill the fields first", "notify")
         return;
     }
@@ -439,7 +435,7 @@ function addfee() {
             if (data === null) return;
             showToast("Record Added successfully");
             reset_fee_form();
-            // fetchfeedetails(data)
+            fetchfeedetails(data)
         })
         .catch(err => {
             console.error(err);
@@ -448,7 +444,6 @@ function addfee() {
 }
 
 function reset_fee_form() {
-    document.getElementById("studentNameforfee").value = "";
     document.getElementById("classforfee").value = "";
     document.getElementById("Sectionforfee").value = "";
     document.getElementById("Rollnumberforfee").value = "";
@@ -463,33 +458,47 @@ let feedetails = [];
 
 
 async function fetchfeedetails(data) {
-    const class_name = data.get("class_name");
-    const roll_number = data.get("roll_number");
-    const month = data.get("month")
+    
+    const feedetails=data
+   
+    try {
+        const webhookUrl = "http://127.0.0.1:5000/feedetails";
 
-    // if (roll_number === "") {
-    //     url = `http://127.0.0.1:5000/students/${class_name}`
-    // }
-    // else {
-    //     url = `http://127.0.0.1:5000/student/${class_name}/${roll_number}`
-    // }
+    fetch(webhookUrl, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(feedetails)
+    })
 
-    // try {
-    //     const res = await fetch(
-    //         url, {
-    //         method: "GET",
-    //     }
-    //     );
+        const res = await fetch(url, { method: "GET" });
 
-    //     students = await res.json();
-    //     renderStudents();
+        console.log("HTTP status:", res.status);
 
-    // } catch (err) {
-    //     showToast("Unable to retrieve data", "error");
-    // }
+        if (!res.ok) {
+            throw new Error(`Request failed with status ${res.status}`);
+        }
+
+        const data = await res.json();
+        console.log("Raw response data:", data);
+
+        if (!Array.isArray(data)) {
+            throw new Error("Expected an array but received something else");
+        }
+
+        window.students = data;
+        students.forEach((s, index) => {
+    console.log(`Student ${index}:`, JSON.stringify(s, null, 2));
+});
+        // renderStudents();
+
+    } catch (err) {
+        console.error("Fetch/render error:", err);
+        showToast("Unable to retrieve data", "error");
+    }
+
 }
-
-
 
 
 function renderStudentsforfee() {
@@ -503,7 +512,6 @@ function renderStudentsforfee() {
 
     students.forEach((s, index) => {
         const row = document.createElement("tr");
-        const student_id = '${s.class_name}-${s.roll_number}';
 
         row.innerHTML = `<td>${s.name}</td>
                 <td>${s.class_name}</td>
