@@ -326,8 +326,21 @@ def fee_details(data):
     class_=data.get('class_name')
     month=data.get('month')
     enroll_id=get_enroll_id(class_, rollnumber)
+    student_id= get_student_id(class_, rollnumber)
 
-    student_fee_data=cursor.execute("""SELECT * FROM fee_records WHERE enrollment_id=? AND month=?""", (enroll_id, month)).fetchall()
+    student_fee_data=cursor.execute("""
+            SELECT 
+                s.full_name, 
+                e.class_name,
+                e.roll_number, 
+                f.month,
+                f.paid_on,
+                f.amount, 
+                f.dues, 
+                f.method 
+                FROM fee_records f JOIN enrollments e ON e.id=f.enrollment_id JOIN students_record s ON s.id = e.student_id WHERE  f.enrollment_id=? AND f.month=?
+            """, (enroll_id, month)).fetchall()
+     
     conn.commit()
     conn.close
     if data==None:
@@ -336,13 +349,61 @@ def fee_details(data):
     return [dict(row) for row in student_fee_data]
 
 
+def fee_report(data):
 
+    conn=get_connection()
+    cursor=conn.cursor()
+
+    class_name = data.get("class_name")
+    roll_number = data.get("roll_number")
+    month = data.get("month")
+
+    query = """
+        SELECT 
+            e.roll_number,
+            e.class_name,
+            f.month,
+            e.total_fee,
+            f.dues
+        FROM fee_records f
+        JOIN enrollments e 
+            ON e.id = f.enrollment_id
+    """
+
+    conditions = []
+    params = []
+
+
+    if class_name is not None:
+        conditions.append("e.class_name = ?")
+        params.append(class_name)
+
+    if roll_number is not None:
+        conditions.append("e.roll_number = ?")
+        params.append(roll_number)
+
+    if month is not None:
+        conditions.append("f.month = ?")
+        params.append(month)
+
+    
+
+    if conditions:
+        query += " WHERE " + " AND ".join(conditions)
+
+    query += " ORDER BY f.month"
+
+    cursor.execute(query, tuple(params))
+
+    results = cursor.fetchall()
+
+    return [dict(row) for row in results]
 
     
 if __name__=="__main__":
-    data = {'class_name': '9', 'roll_number': '100', 'full_name': 'REHAN', 'amount':'500', 'month':'may' }
+    data = {'class_name': '9', 'month':'january'}
     enroll_id="1"
-    result= fee_details(data)
+    result= fee_report(data)
     print(result)
 
 

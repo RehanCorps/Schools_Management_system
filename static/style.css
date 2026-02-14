@@ -183,8 +183,9 @@
         }
 
         tr:hover {
-            background: #d0d0d0;
+            background: #d1d1d1;
         }
+
 
         .badge {
             padding: 6px 12px;

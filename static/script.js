@@ -398,7 +398,7 @@ function canceldelete() {
 
 
 function addfee() {
-    const data = {
+    const feedata = {
         class_name: document.getElementById("classforfee").value,
         section: document.getElementById("Sectionforfee").value,
         roll_number: document.getElementById("Rollnumberforfee").value,
@@ -407,7 +407,7 @@ function addfee() {
         amount: document.getElementById('amount').value,
     };
 
-    if ( !data.roll_number || !data.class_name || !data.section || !data.paid_on || !data.month || !data.amount) {
+    if ( !feedata.roll_number || !feedata.class_name || !feedata.section || !feedata.paid_on || !feedata.month || !feedata.amount) {
         showToast("Fill the fields first", "notify")
         return;
     }
@@ -417,7 +417,7 @@ function addfee() {
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(feedata)
     })
 
         .then(res => {
@@ -435,7 +435,7 @@ function addfee() {
             if (data === null) return;
             showToast("Record Added successfully");
             reset_fee_form();
-            fetchfeedetails(data)
+            fetchfeedetails(feedata)
         })
         .catch(err => {
             console.error(err);
@@ -456,23 +456,19 @@ function reset_fee_form() {
 
 let feedetails = [];
 
+async function fetchfeedetails(feedata) {
 
-async function fetchfeedetails(data) {
-    
-    const feedetails=data
-   
+   const data=feedata
+
     try {
-        const webhookUrl = "http://127.0.0.1:5000/feedetails";
-
-    fetch(webhookUrl, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(feedetails)
-    })
-
-        const res = await fetch(url, { method: "GET" });
+        const url = "http://127.0.0.1:5000/feedetails"; 
+        const res = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        });
 
         console.log("HTTP status:", res.status);
 
@@ -480,57 +476,94 @@ async function fetchfeedetails(data) {
             throw new Error(`Request failed with status ${res.status}`);
         }
 
-        const data = await res.json();
-        console.log("Raw response data:", data);
+        const responseData = await res.json();
+        console.log("Fee details response:", responseData);
 
-        if (!Array.isArray(data)) {
-            throw new Error("Expected an array but received something else");
-        }
-
-        window.students = data;
-        students.forEach((s, index) => {
-    console.log(`Student ${index}:`, JSON.stringify(s, null, 2));
-});
-        // renderStudents();
+        renderStudentsforfee(responseData);
 
     } catch (err) {
-        console.error("Fetch/render error:", err);
-        showToast("Unable to retrieve data", "error");
+        console.error("Error fetching fee details:", err);
+        showToast("Unable to fetch fee details", "error");
     }
-
 }
 
 
-function renderStudentsforfee() {
-    const tbody = document.querySelector("#studentTable tbody");
+
+// General rendering 
+
+
+async function fetchstudentsfee() {
+   const feefetchdata={
+    class_name : document.getElementById("feeclassfilter").value.trim(),
+    roll_number : document.getElementById("feerollfilter").value.trim(),
+    month : document.getElementById("feemonthfilter").value.trim()
+   }
+
+   try {
+        const url = "http://127.0.0.1:5000/allfeedetails"; 
+        const res = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(feefetchdata)
+        });
+
+        console.log("HTTP status:", res.status);
+
+        if (!res.ok) {
+            throw new Error(`Request failed with status ${res.status}`);
+        }
+
+        const responseData = await res.json();
+        console.log("Fee details response:", responseData);
+
+        renderStudentsforfee(responseData);
+
+    } catch (err) {
+        console.error("Error fetching fee details:", err);
+        showToast("Unable to fetch fee details", "error");
+    }
+}
+
+
+
+function renderStudentsforfee(responseData) {
+    document.getElementById("showfeetable").style.display = "block";
+    const tbody = document.querySelector("#showfeetable tbody");
     tbody.innerHTML = "";
 
-    if (!students || students.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5">No students found</td></tr>`;
+    if (!responseData || responseData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5">No records found</td></tr>`;
         return;
     }
 
-    students.forEach((s, index) => {
+    responseData.reverse().forEach((s) => {
         const row = document.createElement("tr");
 
-        row.innerHTML = `<td>${s.name}</td>
-                <td>${s.class_name}</td>
-                <td>${s.section}</td>
-            <td>${s["roll_number"]}</td>
-            <td>${s["father"]}</td>
-            <td>${s.parent_contact}</td>
-            <td>
-           <button type="button" class="btn btn-primary" onclick="startUpdate(${index})">Edit</button>
-           <button type="button" class="btn btn-primary" style="background: red;" onclick="delete_students(${index})">Delete</button>
-           </td>
+        row.innerHTML = `<td>${s.full_name}</td>
+        <td>${s.class_name}</td>
+        <td>${s.roll_number}</td>
+        <td>${s.month.toUpperCase()}</td>
+                <td style="color:green; font-weight:600;">Rs. ${s.amount}</td>
+                <td>${s.paid_on}</td>
+            <td style="color:#ff392bff; font-weight:300; border-radius:30px; ">Rs. ${s.dues}</td>
             `;
 
         tbody.appendChild(row);
     });
 
+    const firstrow=tbody.querySelector("tr:first-child");
+    if (firstrow) {
+        const duescell=firstrow.querySelector("td:nth-child(7)");
+        const originalContent=duescell.textContent;
+      duescell.innerHTML=`
+      <span style='color:red; font-weight:600'>${originalContent}</span>
+      <span style='color: black;font-weight:100'>( Current )</span>
+      `;
+      
 }
-
-
+}
 
 
 // Dashboard functions
@@ -557,7 +590,7 @@ function renderStudentsforfee() {
 //                     labels: ['Paid', 'Pending', 'Overdue'],
 //                     datasets: [{
 //                         data: [paid, pending, overdue],
-//                         backgroundColor: ['#10b981', '#f59e0b', '#ef4444']
+//                         backgroundColor: ['#ff392bff', '#f59e0b', '#ef4444']
 //                     }]
 //                 },
 //                 options: {
