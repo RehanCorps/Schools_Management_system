@@ -28,7 +28,8 @@
         <h1>School Admin</h1>
         <button class="nav-btn active" onclick="showPage('dashboard')">📊 Dashboard</button>
         <button class="nav-btn" onclick="showPage('students')">👥 Manage Students</button>
-        <button class="nav-btn" onclick="showPage('fees')">💰 Fee Status</button>
+        <button class="nav-btn" onclick="showPage('fees')">💰 Manage Fee </button>
+        <button class="nav-btn" onclick="showPage('feestablepage')">📊 Fee Table</button>
         <button class="nav-btn" onclick="showPage('performance')">📈 Class Performance</button>
         <button class="nav-btn" onclick="showPage('teachers')">👨‍🏫 Manage Teachers</button>
         <button class="nav-btn" onclick="showPage('school')">📅 School Info</button>
@@ -283,8 +284,11 @@
                             </option>
                         </select>
                     </h3>
-                    <h3 style="font-size: 16px"> Amount
+                    <h3 style="font-size: 16px"> Amount paid
                         <input style="margin: 5px 0;" type="number" id="amount">
+                    </h3>
+                     <h3 style="font-size: 16px"> Due amount
+                        <input style="margin: 5px 0;" type="number" id="Dues"
                     </h3>
                     <h3 style="font-size: 16px;"> Payment
                         <select style="margin: 5px 0;" id="paymentmethod" required>
@@ -322,6 +326,105 @@
                 </table>
             </div>
         </div>
+
+
+
+   <!-- ============Fee table of stundents======== -->
+
+
+<div id="feestablepage" class="page">
+            <h2>Fee details page</h2>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="number" id="totalStudents">0</div>
+                    <h3>Total Students</h3>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="totalTeachers">0</div>
+                    <h3>Total Teachers</h3>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="totalFees">$0</div>
+                    <h3>Fee Collection</h3>
+                </div>
+            </div>
+             <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
+
+                    <select style="width: 20%;" id="feeclassfilter">
+                        <option value="9">Class 9</option>
+                        <option value="10">Class 10</option>
+                    </select>
+                    <select style="width: 20%;" id="feemonthfilter">
+                            <option value="">
+                                All
+                            </option>
+                            <option value="january">
+                                January
+                            </option>
+                            <option value="feburary">
+                                Feburary
+                            </option>
+                            <option value="march">
+                                March
+                            </option>
+                            <option value="april">
+                                April
+                            </option>
+                            <option value="may">
+                                May
+                            </option>
+                            <option value="june">
+                                June
+                            </option>
+                            <option value="july">
+                                July
+                            </option>
+                            <option value="august">
+                                August
+                            </option>
+                            <option value="september">
+                                September
+                            </option>
+                            <option value="october">
+                                October
+                            </option>
+                            <option value="november">
+                                November
+                            </option>
+                            <option value="december">
+                                December
+                            </option>
+                    </select>
+                    <input style="margin: 5px 20px; width:30%" id="feerollfilter" placeholder="Roll num (Optional)">
+
+                    <button onclick="fetchstudentsfee()" class="btn btn-primary">
+                        Refresh
+                    </button>
+
+                </div>
+            <div class="card" id="feepagetable" style="display: block; border-radius: 30px;">
+                 <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
+
+                </div>
+                <table id="generalfeeTable">
+                    <thead id="tablehead">
+                        <tr>
+                            <th style="border-top-left-radius: 20px;">Name</th>
+                            <th>Class</th>
+                            <th>Roll no.</th>
+                            <th>Month</th>
+                            <th>Amount Paid</th>
+                            <th>Paid on</th>
+                            <th style="border-top-right-radius: 20px;">Dues</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        
 
         <!-- Performance Page -->
         <div id="performance" class="page">

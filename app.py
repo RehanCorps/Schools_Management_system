@@ -2,7 +2,7 @@ from database import get_connection
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import traceback
-from services import add_student, get_students, get_student, update_student, delete_student, add_fee, fee_details,  fee_report
+from services import add_student, get_students, get_student, update_student, delete_student,  fee_details,  fee_report, add_fee_basic
 app = Flask(__name__)
 
 CORS(app)
@@ -35,15 +35,11 @@ def read_student(class_name, roll_number):
 
 
 # update student func 
-from flask import jsonify, request
 
 @app.route('/students/<class_name>/<roll_number>', methods=['PUT'])
 def modify_student(class_name, roll_number):
     
     data = request.get_json()
-
-    if not data:
-        return jsonify({"error": "No data provided"}), 400
 
     result = update_student(class_name, roll_number, data)
 
@@ -75,7 +71,7 @@ def remove_student(class_name, roll_number):
 @app.route('/add-fee-payment', methods=['POST'])
 def showdata():
     data=request.get_json()
-    response= add_fee(data)
+    response= add_fee_basic(data)
     
     if not response  :
         return jsonify({"error": "Student not found"}), 404
@@ -92,27 +88,20 @@ def fetch_fee_details():
     if not response:
         return jsonify({"error": "Student not found"}), 404
     else:
-        return jsonify(response), 200  
+        return jsonify(response), 200
 
 
-@app.route('/feedetails/<class_name>', methods=['POST'])
-def general_fee_details():
-    data=request.json
-    response=fee_details(data)
-    traceback.print_exc()
-    if not response:
-        return jsonify({"error": "Student not found"}), 404
-    else:
-        return jsonify(response), 200  
 
 
 @app.route('/allfeedetails', methods=['POST'])
 def student_total_fee_details():
     data=request.json
     response=fee_report(data)
-    traceback.print_exc()
-    if not response:
-        return jsonify({"error": "Student not found"}), 404
+    if response==[]:
+        return []
+    elif response==None:
+        return jsonify({"error": "error"}), 404
+
     else:
         return jsonify(response), 200  
 

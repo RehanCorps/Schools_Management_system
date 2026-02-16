@@ -1,6 +1,5 @@
 from database import get_connection
 import traceback
-from flask import jsonify 
 
 
 
@@ -171,49 +170,28 @@ def delete_student(class_name, roll_number):
 
 def update_student(class_name, roll_number, data):
 
-    FIELD_MAP = {
-        "name": "name",
-        "class_name": "class_name",
-        "section": "section",
-        "father": "father",
-        "phone": "parent_contact"
-    }
 
     conn = get_connection()
     cursor = conn.cursor()
 
     # existence check
-    cursor.execute(
-        "SELECT 1 FROM students_record WHERE class_name = ? AND roll_number = ?",
-        (class_name, roll_number)
-    )
+    student_check= roll_exists(class_name, roll_number)
+    if student_check ==None:
+        return "student not found", 404
 
-    if cursor.fetchone() is None:
-        conn.close()
-        return {"error": "Student not found"}
-
-    fields = []
-    values = []
-
-    for key, value in data.items():
-        if key in FIELD_MAP:
-            fields.append(f"{FIELD_MAP[key]} = ?")
-            values.append(value)
-
-    if not fields:
-        conn.close()
-        return {"error": "No valid fields to update"}
-
-    values.extend([class_name, roll_number])
-
-    query = f"""
-        UPDATE students_record
-        SET {', '.join(fields)}
-        WHERE class_name = ? AND roll_number = ?
-    """
-
-    cursor.execute(query, tuple(values))
+    student_id=get_student_id(class_name, roll_number)
+   
+    cursor.execute(" BEGIN TRANSACTION;")
+                   
+    cursor.execute("""UPDATE students_record
+                   SET full_name=?, father_name=?, dob=?, gender=? WHERE id=?""", (data.get('name'), data.get('father'), data.get('dob'), data.get('gender'), student_id))
+    
+    cursor.execute("""UPDATE enrollments
+                   SET section=?, total_fee=? WHERE student_id=?""", (data.get('section'), data.get('total_fee'), student_id))
+    
+    
     conn.commit()
+        
     conn.close()
 
     return {"success": "Student updated"}
@@ -221,99 +199,150 @@ def update_student(class_name, roll_number, data):
 # fee management functions 
 
 
-def get_due(data, id):
+# =============================================================
+# -------------------Advanced Fee System---------------------
+# =============================================================
 
-    class_name= data.get("class_name")
-    roll_number = data.get("roll_number")
-    month =data.get("month")
-    conn=get_connection()
-    cursor=conn.cursor()
+# def get_due(data, id):
+
+#     class_name= data.get("class_name")
+#     roll_number = data.get("roll_number")
+#     month =data.get("month")
+#     conn=get_connection()
+#     cursor=conn.cursor()
     
-    total_fee=cursor.execute("SELECT total_fee FROM enrollments WHERE class_name = ? AND roll_number= ?", (class_name, roll_number)).fetchone()
-    enrollment_id=cursor.execute("SELECT id FROM enrollments WHERE class_name = ? AND roll_number= ?", (class_name, roll_number)).fetchone()
-    enrollment_id_value=enrollment_id[0]
-    paid_fee = cursor.execute("SELECT SUM(amount) FROM fee_records WHERE enrollment_id= ? AND month =?", (enrollment_id_value, month,)).fetchone()
+#     total_fee=cursor.execute("SELECT total_fee FROM enrollments WHERE class_name = ? AND roll_number= ?", (class_name, roll_number)).fetchone()
+#     enrollment_id=cursor.execute("SELECT id FROM enrollments WHERE class_name = ? AND roll_number= ?", (class_name, roll_number)).fetchone()
+#     enrollment_id_value=enrollment_id[0]
+#     paid_fee = cursor.execute("SELECT SUM(amount) FROM fee_records WHERE enrollment_id= ? AND month =?", (enrollment_id_value, month,)).fetchone()
     
-    if paid_fee[0]==None:
-        paid_fee=0
-        dues=total_fee[0]-paid_fee
+#     if paid_fee[0]==None:
+#         paid_fee=0
+#         dues=total_fee[0]-paid_fee
       
-        cursor.execute("""
-            UPDATE fee_records SET dues = ? WHERE id = ?
-            """, (dues,id))
-        conn.commit()
-        conn.close()
-        return dues
-    else:
-        dues=total_fee[0]-paid_fee[0]
+#         cursor.execute("""
+#             UPDATE fee_records SET dues = ? WHERE id = ?
+#             """, (dues,id))
+#         conn.commit()
+#         conn.close()
+#         return dues
+#     else:
+#         dues=total_fee[0]-paid_fee[0]
         
-        cursor.execute("""
-            UPDATE fee_records SET dues = ? WHERE id = ?
-                       """, (dues,id))
-        conn.commit()
-        conn.close()
-        return dues
+#         cursor.execute("""
+#             UPDATE fee_records SET dues = ? WHERE id = ?
+#                        """, (dues,id))
+#         conn.commit()
+#         conn.close()
+#         return dues
 
 
 
 
-def add_fee(data):
+# def add_fee(data):
 
-    exist = roll_exists(data.get("class_name"), data.get("roll_number"))
-    if exist == False:
+#     exist = roll_exists(data.get("class_name"), data.get("roll_number"))
+#     if exist == False:
+#         return False
+#     else:
+#         conn = get_connection()
+#         cursor = conn.cursor()
+#         enroll_id= get_enroll_id(data.get("class_name"), data.get("roll_number"))
+        
+#         month_check= cursor.execute("""SELECT SUM(amount) FROM fee_records WHERE enrollment_id = ? AND month =?""", (enroll_id, data.get("month"))).fetchone()
+#         if month_check[0] is None:
+#             total_fee=cursor.execute("SELECT total_fee FROM enrollments WHERE class_name = ? AND roll_number= ?", (data.get("class_name"), data.get("roll_number"))).fetchone()
+#             last_due= month(data, enroll_id)
+#             if last_due=="New entry":
+#                 current_due=int(total_fee[0])
+#             else:
+#                 current_due=int(last_due["dues"])+int(total_fee[0])
+                
+            
+#             dues_with_payment=current_due- int(data.get("amount"))
+#             method="cash"
+#             cursor.execute("""
+#                 INSERT INTO fee_records (enrollment_id,  amount, month, paid_on, method, dues)
+#                 VALUES (?, ?, ?, ?, ?, ?)
+#             """, (
+#             enroll_id,
+#             data.get("amount"),
+#             data["month"],
+#             data.get("paid_on"),
+#             method,
+#             dues_with_payment
+#             ))
+#             conn.commit()
+#             conn.close()
+#         else:
+        
+#             method="cash"
+#             cursor.execute("""
+#                 INSERT INTO fee_records (enrollment_id,  amount, month, paid_on, method)
+#                 VALUES (?, ?, ?, ?, ?)
+#             """, (
+#             enroll_id,
+#             data.get("amount"),
+#             data["month"],
+#             data.get("paid_on"),
+#             method
+#             ))
+        
+#             id=cursor.lastrowid
+        
+#             conn.commit()
+#             conn.close()
+#             get_due(data, id)
+        
+        
+#         return "okay", 200
+
+# =============================================================
+# -------------------End of Advance fee system----------------
+# =============================================================
+
+
+
+# =============================================================
+# -------------------Basic  fee system----------------
+# =============================================================
+
+def add_fee_basic(data):
+     
+    roll_check = roll_exists(data.get("class_name"), data.get("roll_number"))
+    if roll_check == False:
         return False
     else:
         conn = get_connection()
         cursor = conn.cursor()
         enroll_id= get_enroll_id(data.get("class_name"), data.get("roll_number"))
-        
-        month_check= cursor.execute("""SELECT SUM(amount) FROM fee_records WHERE enrollment_id = ? AND month =?""", (enroll_id, data.get("month"))).fetchone()
-        if month_check[0] is None:
-            total_fee=cursor.execute("SELECT total_fee FROM enrollments WHERE class_name = ? AND roll_number= ?", (data.get("class_name"), data.get("roll_number"))).fetchone()
-            last_due= month(data, enroll_id)
-            if last_due=="New entry":
-                current_due=int(total_fee[0])
-            else:
-                current_due=int(last_due["dues"])+int(total_fee[0])
-                
-            
-            dues_with_payment=current_due- int(data.get("amount"))
-            method="cash"
-            cursor.execute("""
-                INSERT INTO fee_records (enrollment_id,  amount, month, paid_on, method, dues)
-                VALUES (?, ?, ?, ?, ?, ?)
-            """, (
+
+        query="""
+                 INSERT INTO fee_records (enrollment_id,  amount, month, paid_on, method, dues)
+                 VALUES (?, ?, ?, ?, ?, ?)
+             """
+        cursor.execute(query, (
             enroll_id,
             data.get("amount"),
             data["month"],
             data.get("paid_on"),
-            method,
-            dues_with_payment
-            ))
-            conn.commit()
-            conn.close()
-        else:
-        
-            method="cash"
-            cursor.execute("""
-                INSERT INTO fee_records (enrollment_id,  amount, month, paid_on, method)
-                VALUES (?, ?, ?, ?, ?)
-            """, (
-            enroll_id,
-            data.get("amount"),
-            data["month"],
-            data.get("paid_on"),
-            method
+            data.get("method"),
+            data["dues"]
             ))
         
-            id=cursor.lastrowid
-        
-            conn.commit()
-            conn.close()
-            get_due(data, id)
+        conn.commit()
+        conn.close()
         
         
         return "okay", 200
+
+# =============================================================
+# ----------------End of Basic  fee system----------------
+# =============================================================
+
+
+
+
     # ---------------------------------
 
     # fee details fetch
@@ -354,15 +383,16 @@ def fee_report(data):
     conn=get_connection()
     cursor=conn.cursor()
 
-    class_name = data.get("class_name")
-    roll_number = data.get("roll_number")
-    month = data.get("month")
+    class_name = bool(data.get("class_name"))
+    roll_number = bool(data.get("roll_number"))
+    month = bool(data.get("month"))
 
     query = """
         SELECT 
             e.roll_number,
             e.class_name,
             f.month,
+            SUM(f.amount) AS amount,
             e.total_fee,
             f.dues
         FROM fee_records f
@@ -374,15 +404,33 @@ def fee_report(data):
     params = []
 
 
-    if class_name is not None:
-        conditions.append("e.class_name = ?")
-        params.append(class_name)
+    if class_name and not month and not roll_number:
+         query = """
+        SELECT 
+            e.roll_number,
+            e.class_name,
+            f.month,
+            SUM(f.amount) AS amount,
+            e.total_fee,
+            (SELECT f2.dues
+            FROM fee_records f2
+            WHERE f2.enrollment_id=f.enrollment_id
+            AND f2.month=f.month
+            ORDER BY f2.id DESC
+            LIMIT 1) AS dues,
+        FROM fee_records f
+        JOIN enrollments e 
+            ON e.id = f.enrollment_id
+        WHERE e.class_name=9
+        GROUP BY e.roll_number, f.month
+        ORDER BY e.roll_number, f.month
+    """
 
-    if roll_number is not None:
+    if roll_number and not month and not class_name:
         conditions.append("e.roll_number = ?")
         params.append(roll_number)
 
-    if month is not None:
+    if month and not class_name and not roll_number:
         conditions.append("f.month = ?")
         params.append(month)
 
@@ -401,9 +449,11 @@ def fee_report(data):
 
     
 if __name__=="__main__":
-    data = {'class_name': '9', 'month':'january'}
+    data = {'name': 'Rehan bhatti', 'dob': '12-04-2025', 'gender':'female', 'total_fee':'4000', 'father':'M.iqbal bhatti', 'section':'B'}
+    data2 = {'class_name':'9', 'month':'march'}
     enroll_id="1"
-    result= fee_report(data)
+    result= fee_report(data2)
     print(result)
+
 
 
