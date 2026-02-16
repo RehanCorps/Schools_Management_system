@@ -383,32 +383,24 @@ def fee_report(data):
     conn=get_connection()
     cursor=conn.cursor()
 
-    class_name = bool(data.get("class_name"))
-    roll_number = bool(data.get("roll_number"))
-    month = bool(data.get("month"))
+    class_name = data.get("class_name")
+    roll_number = data.get("roll_number")
+    month = data.get("month")
 
-    query = """
+
+    has_class=bool(class_name)
+    has_roll=bool(roll_number)
+    has_month=bool(month)
+
+   
+
+   
+
+    if has_class and not has_month and not has_roll:
+        query = """
         SELECT 
+            sr.full_name AS full_name,
             e.roll_number,
-            e.class_name,
-            f.month,
-            SUM(f.amount) AS amount,
-            e.total_fee,
-            f.dues
-        FROM fee_records f
-        JOIN enrollments e 
-            ON e.id = f.enrollment_id
-    """
-
-    conditions = []
-    params = []
-
-
-    if class_name and not month and not roll_number:
-         query = """
-        SELECT 
-            e.roll_number,
-            e.class_name,
             f.month,
             SUM(f.amount) AS amount,
             e.total_fee,
@@ -417,31 +409,93 @@ def fee_report(data):
             WHERE f2.enrollment_id=f.enrollment_id
             AND f2.month=f.month
             ORDER BY f2.id DESC
-            LIMIT 1) AS dues,
+            LIMIT 1) AS dues
         FROM fee_records f
         JOIN enrollments e 
             ON e.id = f.enrollment_id
-        WHERE e.class_name=9
+        JOIN students_record sr
+            ON sr.id = e.student_id
+        WHERE e.class_name=?
         GROUP BY e.roll_number, f.month
         ORDER BY e.roll_number, f.month
     """
+        cursor.execute(query, (class_name,))
+         
 
-    if roll_number and not month and not class_name:
-        conditions.append("e.roll_number = ?")
-        params.append(roll_number)
+    if has_roll and has_class and not has_month:
+        query = """
+        SELECT 
+            sr.full_name AS full_name,
+            e.roll_number,
+            f.month,
+            SUM(f.amount) AS amount,
+            e.total_fee,
+            (SELECT f2.dues
+            FROM fee_records f2
+            WHERE f2.enrollment_id=f.enrollment_id
+            AND f2.month=f.month
+            ORDER BY f2.id DESC
+            LIMIT 1) AS dues
+        FROM fee_records f
+        JOIN enrollments e 
+            ON e.id = f.enrollment_id
+        JOIN students_record sr
+            ON sr.id = e.student_id
+        WHERE e.class_name=? AND e.roll_number=?
+        GROUP BY e.roll_number, f.month
+        ORDER BY e.roll_number, f.month
+    """
+        cursor.execute(query, (class_name, roll_number))
+         
+    if has_month and has_class and not has_roll:
+        query = """
+        SELECT 
+            sr.full_name AS full_name,
+            e.roll_number,
+            SUM(f.amount) AS amount,
+            e.total_fee,
+            (SELECT f2.dues
+            FROM fee_records f2
+            WHERE f2.enrollment_id=f.enrollment_id
+            AND f2.month=f.month
+            ORDER BY f2.id DESC
+            LIMIT 1) AS dues
+        FROM fee_records f
+        JOIN enrollments e 
+            ON e.id = f.enrollment_id
+        JOIN students_record sr
+            ON sr.id = e.student_id
+        WHERE e.class_name=?  AND f.month=?
+        GROUP BY e.roll_number, f.month
+        ORDER BY e.roll_number, f.month
+    """ 
+        cursor.execute(query, (class_name,  month))
 
-    if month and not class_name and not roll_number:
-        conditions.append("f.month = ?")
-        params.append(month)
 
+    if has_month and has_class and has_roll:
+        query = """
+        SELECT 
+            sr.full_name AS full_name,
+            e.roll_number,
+            e.class_name,
+            f.month,
+            f.amount,
+            f.paid_on,
+            e.total_fee,
+            f.dues
+        FROM fee_records f
+        JOIN enrollments e 
+            ON e.id = f.enrollment_id
+        JOIN students_record sr
+            ON sr.id = e.student_id
+        
+        WHERE e.class_name=? AND e.roll_number=? AND f.month=?
+        ORDER BY e.roll_number, f.month
+    """ 
+        cursor.execute(query, (class_name, roll_number, month))
     
 
-    if conditions:
-        query += " WHERE " + " AND ".join(conditions)
-
-    query += " ORDER BY f.month"
-
-    cursor.execute(query, tuple(params))
+  
 
     results = cursor.fetchall()
 
@@ -450,7 +504,7 @@ def fee_report(data):
     
 if __name__=="__main__":
     data = {'name': 'Rehan bhatti', 'dob': '12-04-2025', 'gender':'female', 'total_fee':'4000', 'father':'M.iqbal bhatti', 'section':'B'}
-    data2 = {'class_name':'9', 'month':'march'}
+    data2 = {'class_name':'9', 'month':'january','roll_number':'101'}
     enroll_id="1"
     result= fee_report(data2)
     print(result)

@@ -576,40 +576,75 @@ async function fetchstudentsfee() {
 
 
 function generalrenderforfee(responseData) {
-    const tbody = document.querySelector("#feepagetable tbody");
-    tbody.innerHTML = "";
+    const table = document.getElementById("generalfeeTable");
+    table.innerHTML = ""; // reset
 
     if (!responseData || responseData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5">No records found</td></tr>`;
+        table.innerHTML = "<tr><td>No data found</td></tr>";
         return;
     }
 
-    responseData.reverse().forEach((s) => {
-        const row = document.createElement("tr");
+    // Extract dynamic columns
+    const columns = Object.keys(responseData[0]);
 
-        row.innerHTML = `<td>${s.roll_number}</td>
-        <td>${s.class_name}</td>
-        <td>${s.roll_number}</td>
-        <td>${s.month.toUpperCase()}</td>
-                <td style="color:green; font-weight:600;">Rs. ${s.total_fee}</td>
-                <td>${s.dues}</td>
-            <td style="color:#ff392bff; font-weight:300; border-radius:30px; ">Rs. ${s.dues}</td>
-            `;
+    // Create header
+    const thead = document.createElement("thead");
+    const headerRow = document.createElement("tr");
 
-        tbody.appendChild(row);
+    columns.forEach(column => {
+        const th = document.createElement("th");
+        th.textContent = column.replace(/_/g, "").toUpperCase();
+        headerRow.appendChild(th);
     });
 
-    const firstrow=tbody.querySelector("tr:first-child");
-    if (firstrow) {
-        const duescell=firstrow.querySelector("td:nth-child(7)");
-        const originalContent=duescell.textContent;
-      duescell.innerHTML=`
-      <span style='color:red; font-weight:600'>${originalContent}</span>
-      <span style='color: black;font-weight:100'>( Current )</span>
-      `;
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    // Create body
+    const tbody = document.createElement("tbody");
+
+    responseData.forEach(row => {
+        const tr = document.createElement("tr");
+
+        columns.forEach(column => {
+            const td = document.createElement("td");
+            td.textContent = row[column] ?? "";
+            tr.appendChild(td);
+        });
+
+        tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+}
+
+
+//     responseData.reverse().forEach((s) => {
+//         const row = document.createElement("tr");
+
+//         row.innerHTML = `<td>${s.roll_number}</td>
+//         <td>${s.class_name}</td>
+//         <td>${s.roll_number}</td>
+//         <td>${s.month.toUpperCase()}</td>
+//                 <td style="color:green; font-weight:600;">Rs. ${s.total_fee}</td>
+//                 <td>${s.dues}</td>
+//             <td style="color:#ff392bff; font-weight:300; border-radius:30px; ">Rs. ${s.dues}</td>
+//             `;
+
+//         tbody.appendChild(row);
+//     });
+
+//     const firstrow=tbody.querySelector("tr:first-child");
+//     if (firstrow) {
+//         const duescell=firstrow.querySelector("td:nth-child(7)");
+//         const originalContent=duescell.textContent;
+//       duescell.innerHTML=`
+//       <span style='color:red; font-weight:600'>${originalContent}</span>
+//       <span style='color: black;font-weight:100'>( Current )</span>
+//       `;
       
-}
-}
+// }
+// }
 
 
 // Dashboard functions
