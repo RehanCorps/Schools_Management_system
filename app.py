@@ -1,6 +1,7 @@
 from database import get_connection
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, Response
 from flask_cors import CORS
+import json
 import traceback
 from services import add_student, get_students, get_student, update_student, delete_student,  fee_details,  fee_report, add_fee_basic
 app = Flask(__name__)
@@ -96,14 +97,14 @@ def fetch_fee_details():
 @app.route('/allfeedetails', methods=['POST'])
 def student_total_fee_details():
     data=request.json
-    response=fee_report(data)
-    if response==[]:
+    result=fee_report(data)
+    if result==[]:
         return []
-    elif response==None:
+    elif result==None:
         return jsonify({"error": "error"}), 404
 
     else:
-        return jsonify(response), 200  
+        return Response(response=json.dumps(result, sort_keys=False), status=200) 
 
 
 
@@ -114,3 +115,5 @@ def render_page():
 
 if __name__=="__main__":
     app.run(port=5000, debug=True)
+
+

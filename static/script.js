@@ -585,7 +585,13 @@ function generalrenderforfee(responseData) {
     }
 
     // Extract dynamic columns
-    const columns = Object.keys(responseData[0]);
+    const columns = [];
+    for (const key in responseData[0]){
+        if(responseData[0].hasOwnProperty(key))
+            columns.push(key);
+    }
+
+
 
     // Create header
     const thead = document.createElement("thead");
@@ -597,19 +603,79 @@ function generalrenderforfee(responseData) {
         headerRow.appendChild(th);
     });
 
+    const statusHeader= document.createElement("th");
+    statusHeader.textContent= "Status";
+    headerRow.appendChild(statusHeader)
+
     thead.appendChild(headerRow);
     table.appendChild(thead);
 
     // Create body
     const tbody = document.createElement("tbody");
+    
 
     responseData.forEach(row => {
         const tr = document.createElement("tr");
 
-        columns.forEach(column => {
+
+        const statusCell= document.createElement("td");
+
+        const badge = document.createElement("span");
+            let status;
+            if (row.amount==0){
+                status="Due";
+            }
+
+            else if (row.dues==0){
+                status="Paid";
+            }
+            else{
+                status="Partial";
+            }
+                
+            
+            badge.classList.add("status-badge");
+
+            if (status==="Paid"){
+                badge.classList.add("status-paid")
+            }
+            else if (status==="Due"){
+                badge.classList.add("status-due")
+            }
+            else{
+                badge.classList.add("status-partial")
+            }
+            
+            badge.textContent=status;
+            statusCell.appendChild(badge)
+
+
+            columns.forEach(column => {
+                
             const td = document.createElement("td");
+            responseData.forEach(row=>{
+                const tr= document.createElement("tr");
+                let cellValue=row[column]??"";
+                if(column=="month"){
+                    cellValue=cellValue.toUpperCase();
+                }
+                if (column==="dues" && parseFloat(cellValue)>0){
+                    td.style.color="red";
+                    td.style.fontWeight="bold";
+                }
+                if(column==="amount"){
+                    td.style.textAlign="left";
+                    td.style.color="green";
+                    td.style.fontWeight="bold";
+                }
+                
+            })
+            
             td.textContent = row[column] ?? "";
+            
             tr.appendChild(td);
+            tr.appendChild(statusCell);
+
         });
 
         tbody.appendChild(tr);

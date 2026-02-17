@@ -449,40 +449,54 @@ def fee_report(data):
          
     if has_month and has_class and not has_roll:
         query = """
+        
+SELECT
+    sr.full_name AS name,
+    e.roll_number AS roll,
+    e.total_fee AS fee,
+    COALESCE(SUM(f.amount), 0) AS amount,
+
+   
+    COALESCE(
+        (
+            SELECT f2.dues
+            FROM fee_records f2
+            WHERE f2.enrollment_id = e.id
+              AND f2.month = ?
+            ORDER BY f2.paid_on DESC
+            LIMIT 1
+        ),
+        e.total_fee
+    ) AS dues
+
+FROM enrollments e
+JOIN students_record sr ON sr.id = e.student_id
+LEFT JOIN fee_records f 
+    ON f.enrollment_id = e.id
+    AND f.month = ?
+
+WHERE e.class_name = ?
+GROUP BY e.id
+    """ 
+        cursor.execute(query, (month, month, class_name))
+
+
+    if has_month and has_class and has_roll:
+        query = """
         SELECT 
-            sr.full_name AS full_name,
-            e.roll_number,
-            SUM(f.amount) AS amount,
-            e.total_fee,
+            sr.full_name AS name,
+            e.roll_number AS roll_no,
+            e.class_name AS class,
+            f.month,
+            f.amount,
+            f.paid_on AS date,
+            e.total_fee fee,
             (SELECT f2.dues
             FROM fee_records f2
             WHERE f2.enrollment_id=f.enrollment_id
             AND f2.month=f.month
             ORDER BY f2.id DESC
             LIMIT 1) AS dues
-        FROM fee_records f
-        JOIN enrollments e 
-            ON e.id = f.enrollment_id
-        JOIN students_record sr
-            ON sr.id = e.student_id
-        WHERE e.class_name=?  AND f.month=?
-        GROUP BY e.roll_number, f.month
-        ORDER BY e.roll_number, f.month
-    """ 
-        cursor.execute(query, (class_name,  month))
-
-
-    if has_month and has_class and has_roll:
-        query = """
-        SELECT 
-            sr.full_name AS full_name,
-            e.roll_number,
-            e.class_name,
-            f.month,
-            f.amount,
-            f.paid_on,
-            e.total_fee,
-            f.dues
         FROM fee_records f
         JOIN enrollments e 
             ON e.id = f.enrollment_id
@@ -504,7 +518,7 @@ def fee_report(data):
     
 if __name__=="__main__":
     data = {'name': 'Rehan bhatti', 'dob': '12-04-2025', 'gender':'female', 'total_fee':'4000', 'father':'M.iqbal bhatti', 'section':'B'}
-    data2 = {'class_name':'9', 'month':'january','roll_number':'101'}
+    data2 = {'class_name':'9', 'month':'january'}
     enroll_id="1"
     result= fee_report(data2)
     print(result)
