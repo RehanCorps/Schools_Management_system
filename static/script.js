@@ -564,7 +564,9 @@ async function fetchstudentsfee() {
         const responseData = await res.json();
         console.log("Fee details response:", responseData);
 
-        generalrenderforfee(responseData);
+        handle_response(responseData);
+
+       
 
     } catch (err) {
         console.error("Error fetching fee details:", err);
@@ -572,8 +574,22 @@ async function fetchstudentsfee() {
     }
 }
 
+// handle response function 
 
+function handle_response(responseData){
 
+    if (responseData.mode=='student_mode' ){
+        renderstudentview(responseData)
+    }
+    if (responseData.mode=='general_mode'){
+        generalrenderforfee(responseData)
+    }
+    else{
+        generalrenderforfee(responseData)
+    }
+}
+
+// General render  
 
 function generalrenderforfee(responseData) {
     const table = document.getElementById("generalfeeTable");
@@ -683,6 +699,10 @@ function generalrenderforfee(responseData) {
 
     table.appendChild(tbody);
 }
+
+// Student render 
+
+
 
 
 //     responseData.reverse().forEach((s) => {

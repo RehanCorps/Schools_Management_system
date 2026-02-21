@@ -467,7 +467,8 @@ SELECT
             LIMIT 1
         ),
         e.total_fee
-    ) AS dues
+    ) AS dues,
+    'general_mode' AS mode
 
 FROM enrollments e
 JOIN students_record sr ON sr.id = e.student_id
@@ -496,7 +497,8 @@ GROUP BY e.id
             WHERE f2.enrollment_id=f.enrollment_id
             AND f2.month=f.month
             ORDER BY f2.id DESC
-            LIMIT 1) AS dues
+            LIMIT 1) AS dues,
+            'student_view' AS mode
         FROM fee_records f
         JOIN enrollments e 
             ON e.id = f.enrollment_id
