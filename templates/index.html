@@ -6,13 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>School Management Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
 </head>
 
 <body>
     <div id="toast" class="toast"></div>
-
     <div id="confirmModal" class="modal">
+
+
+
         <div class="modal-box">
             <h3>Confirm Deletion</h3>
             <p>This action cannot be undone.</p>
@@ -28,7 +37,7 @@
         <h1>School Admin</h1>
         <button class="nav-btn active" onclick="showPage('dashboard')">📊 Dashboard</button>
         <button class="nav-btn" onclick="showPage('students')">👥 Manage Students</button>
-        <button class="nav-btn" onclick="showPage('fees')">💰 Manage Fee </button>
+        <button class="nav-btn" onclick="showPage('Managefees')">💰 Manage Fee </button>
         <button class="nav-btn" onclick="showPage('feestablepage')">📊 Fee Table</button>
         <button class="nav-btn" onclick="showPage('performance')">📈 Class Performance</button>
         <button class="nav-btn" onclick="showPage('teachers')">👨‍🏫 Manage Teachers</button>
@@ -72,13 +81,127 @@
             </div>
         </div>
 
+
+
         <!-- Students Page -->
         <div id="students" class="page">
-            <h2>Manage Students</h2>
-            <div class="card" id="studentForm">
+
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="number" id="totalfeecollection">0</div>
+                    <h3>Total Fee Paid</h3>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="totalpendingdues">0</div>
+                    <h3>Total Dues </h3>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="totalpendingstudents">$0</div>
+                    <h3>Status</h3>
+                </div>
+            </div>
+
+            <div class="topbar">
+
+                <div class="topbar-actions">
+
+                    <button class="btn" onclick="studentcard()">
+                        <img style="height: 25px; width: 25px; border-radius: 0px;"
+                            src="https://static.thenounproject.com/png/847977-200.png" alt="">
+
+                        Add Student
+                    </button>
+                    <button class="btn" onclick="delete_student_card()">
+                        <img style="height: 25px; width: 25px; border-radius: 0px;"
+                            src="https://static.thenounproject.com/png/847983-200.png" alt="">
+                        Delete Student
+                    </button>
+                   
+                </div>
+            </div>
+
+            <div class="card">
+                <div> <img style="height: 45px; width: 45px;margin-left:10px ; border-radius: 0px;"
+                        src="https://static.thenounproject.com/png/35785-200.png" alt="">
+                    <h3>Students List</h3>
+                </div>
+
+                <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
+
+                    <select style="width: 30%;" id="classfetchfilter">
+                        <option value="9">Class 9</option>
+                        <option value="10">Class 10</option>
+                    </select>
+                    <input style="margin: 5px 20px; width: 30%;" id="rollfetchfilter" placeholder="Roll num (Optional)">
+
+                    <button onclick="fetchStudents()" class="btn btn-primary">
+                        <img style="height: 25px; width: 25px; border-radius: 10%;"
+                            src="https://icons.veryicon.com/png/o/miscellaneous/designer-icon-1/searchbar.png" alt="">
+
+                    </button>
+
+                </div>
+
+
+
+                <table id="studentTable">
+                    <thead>
+                        <tr>
+                            <th style="border-top-left-radius: 20px;">Name</th>
+                            <th>Class</th>
+                            <th>Section</th>
+                            <th>Roll number</th>
+                            <th>Gender</th>
+                            <th>Father/Gaurdian</th>
+                            <th></th>
+                            <th></th>
+                            <th style="border-top-right-radius: 20px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+
+            <div class="card" style="display: none; position: relative;" id="studentForm">
+                <button class="close-btn" onclick="closeCard('studentForm')">
+                    &times;
+                </button>
                 <h3 id="addlabel">Add New Student</h3>
                 <h3 id="updatelabel" style="display: none;">Update Student</h3>
+
+                <div class="image-upload-container">
+
+                    <label for="imageInput" class="upload-box">
+                        <img id="previewImage"
+                            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT-HmAlYRaMiTx6PqSGcL9ifkAFxWHVPvhiHQ&s"
+                            alt="Preview">
+
+                        <span class="upload-text">Click to upload image</span>
+                    </label>
+
+                    <input type="file" id="imageInput" accept="image/png, image/jpeg, image/webp">
+
+                </div>
+                <script>
+                    document.getElementById("imageInput")
+                        .addEventListener("change", function () {
+
+                            const file = this.files[0];
+                            if (!file) return;
+
+                            const reader = new FileReader();
+
+                            reader.onload = function (e) {
+                                document.getElementById("previewImage").src = e.target.result;
+                            };
+
+                            reader.readAsDataURL(file);
+                        });
+                </script>
                 <div class="form-grid">
+
                     <label style="font-size:16px;">Name
                         <input type="text" id="studentName" placeholder="Student Name" style="margin:5px 0;">
                     </label>
@@ -86,6 +209,35 @@
                     <label style="font-size:16px;">Date of Birth
                         <input type="date" id="studentDOB" style="margin:5px 0;">
                     </label>
+
+                    <label style="font-size:16px;">B-form No
+                        <input type="text" id="bform" maxlength="15" placeholder="12345-1234567-1" style="margin:5px 0;"
+                            required>
+                    </label>
+                    <script>document.getElementById("bform").addEventListener("input", function () {
+
+                            let digits = this.value.replace(/\D/g, ""); // Remove non-digits
+
+                            if (digits.length > 13) {
+                                digits = digits.slice(0, 13);
+                            }
+
+                            let formatted = "";
+
+                            if (digits.length > 0) {
+                                formatted = digits.slice(0, 5);
+                            }
+
+                            if (digits.length > 5) {
+                                formatted += "-" + digits.slice(5, 12);
+                            }
+
+                            if (digits.length > 12) {
+                                formatted += "-" + digits.slice(12, 13);
+                            }
+
+                            this.value = formatted;
+                        });</script>
 
                     <label style="font-size:16px;">Gender
                         <select id="studentGender" required style="margin:5px 0;">
@@ -131,23 +283,33 @@
                         <input type="text" id="phone" placeholder="e.g., 1234567890" style="margin:5px 0;">
                     </label>
 
+                    <label style="font-size:16px;">Address
+                        <input type="text" id="address" placeholder="Full Address" style="margin:5px 0;">
+                    </label>
+
                 </div>
 
-                <button class="btn btn-primary" style="background: green;"
+                <button class="btn2 btn-primary" style="background: green;"
                     onmouseover="this.style.background='darkgreen'" onmouseout="this.style.background='green'"
-                    type="submit" id="addBtn" onclick="addStudent()">Add Student</button>
+                    type="submit" id="addBtn" onclick="addStudent()">Add
+                    Student</button>
 
-                <button class="btn btn-primary" id="updateBtn" style="display:none"
-                    onclick="updateStudent(event)">Update Student</button>
+                <button class="btn2 btn-primary" id="updateBtn" style="display:none"
+                    onclick="updateStudent(event)">Update
+                    Student</button>
 
-                <button class="btn btn-primary" type="button" id="cancelBtn" style="display:none; background: #991b1b"
+                <button class="btn2 btn-primary" type="button" id="cancelBtn" style="display:none; background: #991b1b"
                     onclick="cancelUpdate()">
                     Cancel
                 </button>
             </div>
 
 
-            <div class="card" id="deletestudentscard">
+            <div class="card" id="deletestudentscard" style="display: none; position: relative;">
+
+                <button class="close-btn" onclick="closeCard('deletestudentscard')">
+                    &times;
+                </button>
                 <h3>Delete a Student</h3>
                 <div class="form-grid">
 
@@ -169,11 +331,11 @@
                         <input style="margin: 5px 0;" type="text" id="Rollnumber" placeholder="e.g., A-123">
                     </h3>
                 </div>
-                <button class="btn btn-primary" style="background-color: #991b1b;"
+                <button class="btn2 btn-primary" style="background-color: #991b1b;"
                     onmouseover="this.style.background='darkred'" onmouseout="this.style.background='#991b1b'"
                     onclick="openConfirm()">Delete
                     Student</button>
-                <button class="btn btn-primary" type="button" id="canceldeleteBtn"
+                <button class="btn2 btn-primary" type="button" id="canceldeleteBtn"
                     style="display:none; background: #0044d6" onclick="canceldelete()">
                     Cancel Delete
                 </button>
@@ -181,236 +343,330 @@
             </div>
 
 
-            <div class="card">
-                <h3>Students List</h3>
 
-                <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
-
-                    <select style="width: 30%;" id="classfetchfilter">
-                        <option value="9">Class 9</option>
-                        <option value="10">Class 10</option>
-                    </select>
-                    <input style="margin: 5px 20px;" id="rollfetchfilter" placeholder="Roll num (Optional)">
-
-                    <button onclick="fetchStudents()" class="btn btn-primary">
-                        Refresh
-                    </button>
-
-                </div>
-
-                <table id="studentTable">
-                    <thead>
-                        <tr>
-                            <th style="border-top-left-radius: 20px;">Name</th>
-                            <th>Class</th>
-                            <th>Section</th>
-                            <th>Roll number</th>
-                            <th>Gender</th>
-                            <th>Father/Gaurdian</th>
-                            <th style="display: flex; align-items: center; justify-content: center; border-top-right-radius: 20px;" ">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
         </div>
+
+        <!-- students list page  -->
 
         <!-- Fees Page -->
-        <div id="fees" class="page">
-            <h2>Fee Status Management</h2>
+        <section>
+            <div id="Managefees" class="page">
+                <h2>Fee Status Management</h2>
 
-            <div class="card">
-                <h3>Add Record</h3>
-                <div class="form-grid">
-                    
-                    <h3 style="font-size: 16px;"> Class
-                        <select style="margin: 5px 0;" name="status" id="classforfee" required>
+                <div class="card">
+                    <h3>Add Record</h3>
+                    <div class="form-grid">
+                        <h3 style="font-size: 16px;"> Class
+                            <select style="margin: 5px 0;" name="status" id="classforfee" required>
 
-                            <option value="9">
-                                9
-                            </option>
-                            <option value="10">
-                                10
-                            </option>
-                        </select>
-                    </h3>
-                    <h3 style="font-size: 16px"> Section
-                        <input style="margin: 5px 0;" type="text" id="Sectionforfee" placeholder="e.g., A">
-                    </h3>
-                    <h3 style="font-size: 16px"> Roll Number
-                        <input style="margin: 5px 0;" type="text" id="Rollnumberforfee" placeholder="e.g., A-123">
-                    </h3>
-                    <h3 style="font-size: 16px"> Date
-                        <input style="margin: 5px 0;" type="date" id="feedate" placeholder="MM/DD/YYYY">
-                    </h3>
-                    <h3 style="font-size: 16px;"> Month
-                        <select style="margin: 5px 0;" id="feemonth" required>
+                                <option value="9">
+                                    9
+                                </option>
+                                <option value="10">
+                                    10
+                                </option>
+                            </select>
+                        </h3>
+                        <h3 style="font-size: 16px"> Section
+                            <input style="margin: 5px 0;" type="text" id="Sectionforfee" placeholder="e.g., A">
+                        </h3>
+                        <h3 style="font-size: 16px"> Roll Number
+                            <input style="margin: 5px 0;" type="text" id="Rollnumberforfee" placeholder="e.g., A-123">
+                        </h3>
+                        <h3 style="font-size: 16px"> Date
+                            <input style="margin: 5px 0;" type="date" id="feedate" placeholder="MM/DD/YYYY">
+                        </h3>
+                        <h3 style="font-size: 16px;"> Month
+                            <select style="margin: 5px 0;" id="feemonth" required>
 
-                            <option value="january">
-                                January
-                            </option>
-                            <option value="feburary">
-                                Feburary
-                            </option>
-                            <option value="march">
-                                March
-                            </option>
-                            <option value="april">
-                                April
-                            </option>
-                            <option value="may">
-                                May
-                            </option>
-                            <option value="june">
-                                June
-                            </option>
-                            <option value="july">
-                                July
-                            </option>
-                            <option value="august">
-                                August
-                            </option>
-                            <option value="september">
-                                September
-                            </option>
-                            <option value="october">
-                                October
-                            </option>
-                            <option value="november">
-                                November
-                            </option>
-                            <option value="december">
-                                December
-                            </option>
-                        </select>
-                    </h3>
-                    <h3 style="font-size: 16px"> Amount paid
-                        <input style="margin: 5px 0;" type="number" id="amount">
-                    </h3>
-                     <h3 style="font-size: 16px"> Due amount
-                        <input style="margin: 5px 0;" type="number" id="Dues"
-                    </h3>
-                    <h3 style="font-size: 16px;"> Payment
-                        <select style="margin: 5px 0;" id="paymentmethod" required>
+                                <option value="january">
+                                    January
+                                </option>
+                                <option value="feburary">
+                                    Feburary
+                                </option>
+                                <option value="march">
+                                    March
+                                </option>
+                                <option value="april">
+                                    April
+                                </option>
+                                <option value="may">
+                                    May
+                                </option>
+                                <option value="june">
+                                    June
+                                </option>
+                                <option value="july">
+                                    July
+                                </option>
+                                <option value="august">
+                                    August
+                                </option>
+                                <option value="september">
+                                    September
+                                </option>
+                                <option value="october">
+                                    October
+                                </option>
+                                <option value="november">
+                                    November
+                                </option>
+                                <option value="december">
+                                    December
+                                </option>
+                            </select>
+                        </h3>
+                        <h3 style="font-size: 16px"> Amount paid
+                            <input style="margin: 5px 0;" type="number" id="amount">
+                        </h3>
+                        <h3 style="font-size: 16px"> Due amount
+                            <input style="margin: 5px 0;" type="number" id="Dues" </h3>
+                            <h3 style="font-size: 16px;"> Payment
+                                <select style="margin: 5px 0;" id="paymentmethod" required>
 
-                            <option value="cash">
-                                Cash
-                            </option>
-                            <option value="online">
-                                Online
-                            </option>
-                        </select>
-                    </h3>
-                </div>
-                <button class="btn btn-primary" style="background-color: green;" onclick="addfee()">Add</button>
-
-            </div>
-
-            <div class="card" id="showfeetable" style="display: none; border-radius: 30px;">
-                 <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
+                                    <option value="cash">
+                                        Cash
+                                    </option>
+                                    <option value="online">
+                                        Online
+                                    </option>
+                                </select>
+                            </h3>
+                    </div>
+                    <button class="btn btn-primary" style="background-color: green;" onclick="addfee()">Add</button>
 
                 </div>
-                <table id="feeTable">
-                    <thead id="tablehead">
-                        <tr>
-                            <th style="border-top-left-radius: 20px;">Name</th>
-                            <th>Class</th>
-                            <th>Roll no.</th>
-                            <th>Month</th>
-                            <th>Amount Paid</th>
-                            <th>Paid on</th>
-                            <th style="border-top-right-radius: 20px;">Dues</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+
+                <div class="card" id="showfeetable" style="display: none; border-radius: 30px;">
+                    <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
+
+                    </div>
+                    <table id="feeTable">
+                        <thead id="tablehead">
+                            <tr>
+                                <th style="border-top-left-radius: 20px;">Name</th>
+                                <th>Class</th>
+                                <th>Roll no.</th>
+                                <th>Month</th>
+                                <th>Amount Paid</th>
+                                <th>Paid on</th>
+                                <th style="border-top-right-radius: 20px;">Dues</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
             </div>
-        </div>
 
 
+        </section>
 
-   <!-- ============Fee table of stundents======== -->
+        <!-- ============Fee table of stundents======== -->
 
 
-<div id="feestablepage" class="page">
-            <h2>Fee details page</h2>
+        <div id="feestablepage" class="page">
 
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="number" id="totalStudents">0</div>
-                    <h3>Total Students</h3>
+                    <div class="number" id="totalfeecollection">0</div>
+                    <h3>Total Fee Paid</h3>
                 </div>
                 <div class="stat-card">
-                    <div class="number" id="totalTeachers">0</div>
-                    <h3>Total Teachers</h3>
+                    <div class="number" id="totalpendingdues">0</div>
+                    <h3>Total Dues </h3>
                 </div>
                 <div class="stat-card">
-                    <div class="number" id="totalFees">$0</div>
-                    <h3>Fee Collection</h3>
+                    <div class="number" id="totalpendingstudents">$0</div>
+                    <h3>Status</h3>
                 </div>
             </div>
-             <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
 
-                    <select style="width: 20%;" id="feeclassfilter">
-                        <option value="9">Class 9</option>
-                        <option value="10">Class 10</option>
-                    </select>
-                    <select style="width: 20%;" id="feemonthfilter">
-                           
-                            <option value="january">
-                                January
-                            </option>
-                            <option value="feburary">
-                                Feburary
-                            </option>
-                            <option value="march">
-                                March
-                            </option>
-                            <option value="april">
-                                April
-                            </option>
-                            <option value="may">
-                                May
-                            </option>
-                            <option value="june">
-                                June
-                            </option>
-                            <option value="july">
-                                July
-                            </option>
-                            <option value="august">
-                                August
-                            </option>
-                            <option value="september">
-                                September
-                            </option>
-                            <option value="october">
-                                October
-                            </option>
-                            <option value="november">
-                                November
-                            </option>
-                            <option value="december">
-                                December
-                            </option>
-                    </select>
-                    <input style="margin: 5px 20px; width:30%" id="feerollfilter" placeholder="Roll num (Optional)">
+            <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
 
-                    <button onclick="fetchstudentsfee()" class="btn btn-primary">
-                        Refresh
-                    </button>
+                <select style="width: 20%;" id="feeclassfilter">
+                    <option value="9">Class 9</option>
+                    <option value="10">Class 10</option>
+                </select>
+                <select style="width: 20%;" id="feemonthfilter">
 
+                    <option value="january">
+                        January
+                    </option>
+                    <option value="feburary">
+                        Feburary
+                    </option>
+                    <option value="march">
+                        March
+                    </option>
+                    <option value="april">
+                        April
+                    </option>
+                    <option value="may">
+                        May
+                    </option>
+                    <option value="june">
+                        June
+                    </option>
+                    <option value="july">
+                        July
+                    </option>
+                    <option value="august">
+                        August
+                    </option>
+                    <option value="september">
+                        September
+                    </option>
+                    <option value="october">
+                        October
+                    </option>
+                    <option value="november">
+                        November
+                    </option>
+                    <option value="december">
+                        December
+                    </option>
+                </select>
+                <input style="margin: 5px 20px; width:30%" id="feerollfilter" placeholder="Roll num (Optional)">
+
+                <button onclick="fetchstudentsfee()" class="btn btn-primary">
+                    Refresh
+                </button>
+
+            </div>
+
+            <div>
+                <div class="topbar">
+
+                    <div class="topbar-actions">
+                        <button id="backbtninfee" style="display: none;" class="btn" onclick="backbtn_in_feepage()">
+                            ⬉ Back
+                        </button>
+                        <button class="btn">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="6 9 6 2 18 2 18 9" />
+                                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                                <rect x="6" y="14" width="12" height="8" />
+                            </svg>
+                            Print
+                        </button>
+                        <button class="btn">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                            </svg>
+                            Send Reminder
+                        </button>
+                        <button class="btn">Show Advance Fee</button>
+                    </div>
                 </div>
+
+                <div class="main" id="feecard" style="display: none;">
+                    <div class="left-col">
+
+                        <div class="profile-card">
+                            <div class="avatar-wrap">
+                                <div class="avatar"><img
+                                        src="https://res.cloudinary.com/dhcayqpqr/image/upload/v1771685889/movde8tv3nwycpx2lwnf.jpg"
+                                        style="height: 100px; width: 100px; border-radius: 60%;" alt=""></div>
+                            </div>
+                            <div class="profile-info">
+                                <h2 id="nameofstudent">Ayesha Bibi <span class="tag">PARENT</span></h2>
+                                <div class="sub" id="rollofstudent">ID: AB-0042 &nbsp;|&nbsp; Flat 45 Block B
+                                    Lahore
+                                </div>
+                                <div class="sub" id="classofstudent">ID: AB-0042 &nbsp;|&nbsp; Flat 45 Block B
+                                    Lahore</div>
+                                <div class="toggle-row">
+                                    <label class="toggle">
+                                        <input type="checkbox" id="discountToggle">
+                                        <span class="slider"></span>
+                                    </label>
+                                    <span class="toggle-label">Show Discount</span>
+                                </div>
+                            </div>
+                            <div class="profile-meta">
+                                <div class="phone">03217654321</div>
+                            </div>
+                        </div>
+
+                        <div class="student-card">
+                            <div class="student-header">
+                                <div class="student-avatar">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                        <circle cx="12" cy="7" r="4" />
+                                    </svg>
+                                </div>
+                                <div class="student-meta">
+                                    <h3>
+                                        Zainab Bibi
+                                        <button class="eye-btn">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                                <circle cx="12" cy="12" r="3" />
+                                            </svg>
+                                        </button>
+                                    </h3>
+                                    <div class="roll">Roll No: 201</div>
+                                </div>
+                                <div>
+                                    <div class="student-class">Eight <span>Class A</span></div>
+                                </div>
+                                <div class="total-fee">
+                                    <div class="amount" id="totalFeeDisplay">81,331 PKR</div>
+                                    <div class="label">Total Fee</div>
+                                </div>
+                            </div>
+
+                            <div class="table-wrap">
+                                <table class="fee-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Month</th>
+                                            <th>Type</th>
+                                            <th>Reason</th>
+                                            <th class="discount-col">Add. Discount</th>
+                                            <th>Total Paid</th>
+                                            <th>Date</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="right-panel">
+                        <div class="stat-card">
+                            <div class="number" style="color: green; font-weight: 600;" id="studentTotalPaid">0
+                            </div>
+                            <h3>Total Fee Paid</h3>
+                        </div>
+                        <div class="stat-card">
+                            <div class="number" style="color: red; font-weight: 600;" id="studentTotalDue">0
+                            </div>
+                            <h3>Total Dues </h3>
+                        </div>
+                        <div class="stat-card">
+                            <div class="number" id="studentStatus">$0</div>
+                            <h3>Status</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
             <div class="card" id="feepagetable" style="display: block; border-radius: 30px;">
-                 <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
 
-                </div>
-                <table id="generalfeeTable">
+                <table id="generalfeeTable" class="fee-table">
                 </table>
             </div>
         </div>
 
-        
 
         <!-- Performance Page -->
         <div id="performance" class="page">
@@ -487,7 +743,8 @@
                 <div class="card">
                     <h3>📅 Add Event</h3>
                     <input type="text" id="eventInput" placeholder="Enter event">
-                    <button class="btn btn-success" style="margin-top: 15px;" onclick="addEvent()">Add Event</button>
+                    <button class="btn btn-success" style="margin-top: 15px;" onclick="addEvent()">Add
+                        Event</button>
                 </div>
             </div>
             <div class="chart-grid">
@@ -505,8 +762,12 @@
 
 
     <script src="{{url_for('static', filename='script.js')}}">
-    
+
     </script>
+
+    <div id="loaderOverlay" style="display:none;">
+        <div class="spinner"></div>
+    </div>
 </body>
 
 </html>

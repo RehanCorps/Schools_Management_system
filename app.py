@@ -1,5 +1,7 @@
 from database import get_connection
-from flask import Flask, request, jsonify, render_template, Response
+import cloudinary
+import cloudinary.uploader
+from flask import Flask, request, jsonify, render_template, Response, url_for
 from flask_cors import CORS
 import json
 import traceback
@@ -8,17 +10,41 @@ app = Flask(__name__)
 
 CORS(app)
 
+# cloudinary configuration 
+cloudinary.config(
+    cloud_name="dhcayqpqr",
+    api_key="112842994958122",
+    api_secret="qGiPvNxI2gddK2QfGbMhEUyTpbM"
+)
+
+
 
 
 
 # add student func
 @app.route('/students', methods=['POST'])
 def create_student():
-    data = request.json
+
+    data = request.form.to_dict()
+
+    image_file = request.files.get("image")
+
+    image_url = None
+
+    if image_file:
+        try:
+            upload_result = cloudinary.uploader.upload(image_file)
+            image_url = upload_result["secure_url"]
+
+        except Exception as e:
+            return jsonify({"error": "Image upload failed", "details": str(e)}), 500
+
+    data["profile_image"] = image_url
 
     response, status_code = add_student(data)
 
     return jsonify(response), status_code
+
 
 
 # get student func 
@@ -112,6 +138,9 @@ def student_total_fee_details():
 def render_page():
     return render_template("index.html")
 
+@app.context_processor
+def inject_user():
+    return dict(ASSETS=url_for('static', filename='assets/')) 
 
 if __name__=="__main__":
     app.run(port=5000, debug=True)

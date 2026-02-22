@@ -1,6 +1,4 @@
-#!/bin/sh
-'''exec' "/home/rehnova/School management sys/offline management sys/venv/bin/python3" "$0" "$@"
-' '''
+#!/mnt/c/Users/muham/Downloads/Schools_Management_system/venv/bin/python3
 import sys
 from flask.cli import main
 if __name__ == '__main__':

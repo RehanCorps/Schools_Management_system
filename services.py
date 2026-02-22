@@ -42,6 +42,8 @@ def month(data, enroll_id):
         return "New entry"
     return dict(last_data)
     
+
+
 def add_enrollments(data, id):
 
     conn=get_connection()
@@ -80,14 +82,19 @@ def add_student(data):
         cursor = conn.cursor()
 
         cursor.execute("""
-        INSERT INTO students_record (full_name, father_name, dob, gender)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO students_record (full_name, father_name, dob, gender, b_form,  photo, contact, address)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, (
         data["name"],
         data.get("father"),
         data["dob"],
         data.get("gender"),
+        data.get("bform"),
+        data.get("profile_image"),
+        data.get("phone"),
+        data.get("address")
         ))
+       
 
         conn.commit()
         conn.close()
@@ -96,7 +103,7 @@ def add_student(data):
 
         enrollments_details_add= add_enrollments(data, id)
 
-        return {"success": True, "message": "Roll Doesnt exists"}, 200
+        return {"success": True, "message": "Student added successfully"}, 200
   
 
 
@@ -164,7 +171,7 @@ def delete_student(class_name, roll_number):
         affected_rows=cursor.rowcount
 
         conn.close()
-        return affected_rows > 0
+    return affected_rows > 0
 
 
 
@@ -455,19 +462,7 @@ SELECT
     e.roll_number AS roll,
     e.total_fee AS fee,
     COALESCE(SUM(f.amount), 0) AS amount,
-
-   
-    COALESCE(
-        (
-            SELECT f2.dues
-            FROM fee_records f2
-            WHERE f2.enrollment_id = e.id
-              AND f2.month = ?
-            ORDER BY f2.paid_on DESC
-            LIMIT 1
-        ),
-        e.total_fee
-    ) AS dues,
+    (e.total_fee - COALESCE(SUM(f.amount), 0)) AS dues,
     'general_mode' AS mode
 
 FROM enrollments e
@@ -479,36 +474,46 @@ LEFT JOIN fee_records f
 WHERE e.class_name = ?
 GROUP BY e.id
     """ 
-        cursor.execute(query, (month, month, class_name))
+        cursor.execute(query, (month,  class_name))
 
 
     if has_month and has_class and has_roll:
         query = """
-        SELECT 
-            sr.full_name AS name,
-            e.roll_number AS roll_no,
-            e.class_name AS class,
-            f.month,
-            f.amount,
-            f.paid_on AS date,
-            e.total_fee fee,
-            (SELECT f2.dues
+       SELECT 
+    sr.full_name AS name,
+    e.roll_number AS roll_no,
+    e.class_name AS class,
+    f.month,
+    COALESCE(f.amount, 0) AS amount,
+    f.paid_on AS date,
+    e.total_fee AS fee,
+
+    COALESCE(
+        (
+            SELECT f2.dues
             FROM fee_records f2
-            WHERE f2.enrollment_id=f.enrollment_id
-            AND f2.month=f.month
+            WHERE f2.enrollment_id = e.id
+              AND f2.month = ?
             ORDER BY f2.id DESC
-            LIMIT 1) AS dues,
-            'student_view' AS mode
-        FROM fee_records f
-        JOIN enrollments e 
-            ON e.id = f.enrollment_id
-        JOIN students_record sr
-            ON sr.id = e.student_id
-        
-        WHERE e.class_name=? AND e.roll_number=? AND f.month=?
-        ORDER BY e.roll_number, f.month
+            LIMIT 1
+        ),
+        e.total_fee
+    ) AS dues,
+
+    'student_view' AS mode
+
+FROM enrollments e
+JOIN students_record sr 
+    ON sr.id = e.student_id
+
+LEFT JOIN fee_records f
+    ON f.enrollment_id = e.id
+    AND f.month = ?
+
+WHERE e.class_name = ?
+  AND e.roll_number = ?
     """ 
-        cursor.execute(query, (class_name, roll_number, month))
+        cursor.execute(query, ( month, month, class_name, roll_number))
     
 
   
@@ -517,13 +522,41 @@ GROUP BY e.id
 
     return [dict(row) for row in results]
 
+
+# ======================== 
+
+def run_query():
+    conn=get_connection()
+    cursor=conn.cursor()
+    query = """
+  CREATE TABLE enrollments(
+                   id INTEGER PRIMARY KEY AUTOINCREMENT,
+                   student_id INTEGER NOT NULL,
+                   class_name TEXT NOT NULL,
+                   roll_number INTEGER NOT NULL,
+                   section TEXT,
+                   session_year TEXT NOT NULL,
+                   status TEXT NOT NULL CHECK (status IN ('active', 'completed', 'left')),
+                   created_at DATE DEFAULT (DATE('now')), total_fee INTEGER NOT NULL DEFAULT 0,
+                   FOREIGN KEY (student_id)
+                   REFERENCES students_record(id)
+                   );
+CREATE UNIQUE INDEX uq_class_roll_session
+                   ON enrollments (class_name, roll_number, session_year)
+;
+CREATE UNIQUE INDEX uq_active_class_roll
+                   ON enrollments (class_name, roll_number)
+                   WHERE status='active'
+    """
+    cursor.execute(query)
+    conn.commit()
+    conn.close()    
+
     
 if __name__=="__main__":
-    data = {'name': 'Rehan bhatti', 'dob': '12-04-2025', 'gender':'female', 'total_fee':'4000', 'father':'M.iqbal bhatti', 'section':'B'}
-    data2 = {'class_name':'9', 'month':'january'}
-    enroll_id="1"
-    result= fee_report(data2)
-    print(result)
+    
+    query_run= run_query()
+    print(query_run)
 
 
 

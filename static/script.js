@@ -1,7 +1,3 @@
-const select = document.getElementById("status");
-select.addEventListener("change", () => {
-    concole.log("Selected:", select.value)
-})
 
 
 // Data storage
@@ -23,35 +19,42 @@ function showPage(pageId) {
 // Add students
 // -----------------------------------
 function addStudent() {
-    event.preventDefault()
-    const student = {
-        name: document.getElementById("studentName").value.trim(),
-        dob: document.getElementById("studentDOB").value,
-        gender: document.getElementById("studentGender").value,
-        class_name: document.getElementById("addstudentclass").value,
-        section: document.getElementById("section").value.trim(),
-        roll_number: document.getElementById("rollNumber").value.trim(),
-        father: document.getElementById("fatherName").value.trim(),
-        phone: document.getElementById("phone").value.trim(),
-        total_fee: document.getElementById("totalFee").value.trim(),
-        session: document.getElementById("session").value.trim()
-    };
+    event.preventDefault();
 
-    if (!student.name || !student.class_name || !student.section || !student.roll_number) {
+    const imageFile = document.getElementById("imageInput").files[0];
+
+    const formData = new FormData();
+
+    formData.append("name", document.getElementById("studentName").value.trim());
+    formData.append("dob", document.getElementById("studentDOB").value);
+    formData.append("gender", document.getElementById("studentGender").value);
+    formData.append("class_name", document.getElementById("addstudentclass").value);
+    formData.append("section", document.getElementById("section").value.trim());
+    formData.append("roll_number", document.getElementById("rollNumber").value.trim());
+    formData.append("father", document.getElementById("fatherName").value.trim());
+    formData.append("phone", document.getElementById("phone").value.trim());
+    formData.append("total_fee", document.getElementById("totalFee").value.trim());
+    formData.append("session", document.getElementById("session").value.trim());
+    formData.append("address", document.getElementById("address").value.trim());
+    formData.append("bform", document.getElementById("bform").value.trim());
+
+    if (imageFile) {
+        formData.append("image", imageFile);
+    }
+
+    if (!formData.get("name") || !formData.get("class_name") || !formData.get("section") || !formData.get("roll_number")) {
         showToast("Please fill in the fields", "error");
         return;
     }
+    const loader = document.getElementById("loaderOverlay");
+    loader.style.display = "flex";
 
-    const webhookUrl = "http://127.0.0.1:5000/students";
-
-    fetch(webhookUrl, {
+    fetch("http://127.0.0.1:5000/students", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(student)
+        body: formData
     })
         .then(response => {
+            loader.style.display = "none";
             if (response.ok) {
                 showToast("Student added successfully!");
 
@@ -64,17 +67,23 @@ function addStudent() {
                 document.getElementById("phone").value = "";
                 document.getElementById("totalFee").value = "";
                 document.getElementById("session").value = "";
+                document.getElementById("bform").value = "";
+                document.getElementById("address").value = "";
                 document.getElementById("studentGender").value = "male";
+                document.getElementById("imageInput").value = "";
 
+
+                document.getElementById("previewImage").src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT-HmAlYRaMiTx6PqSGcL9ifkAFxWHVPvhiHQ&s";
             } else {
                 showToast("Student already exists", "error");
             }
         })
         .catch(() => {
+            loader.style.display = "none";
             showToast("Server error", "error");
         });
-
 }
+
 
 
 
@@ -170,8 +179,8 @@ async function fetchStudents() {
 
         window.students = data;
         students.forEach((s, index) => {
-    console.log(`Student ${index}:`, JSON.stringify(s, null, 2));
-});
+            console.log(`Student ${index}:`, JSON.stringify(s, null, 2));
+        });
         renderStudents();
 
     } catch (err) {
@@ -185,7 +194,7 @@ async function fetchStudents() {
 
 
 function renderStudents() {
-    
+
     const tbody = document.querySelector("#studentTable tbody");
     tbody.innerHTML = "";
 
@@ -195,22 +204,36 @@ function renderStudents() {
     }
     students.forEach((s, index) => {
         const row = document.createElement("tr");
-                
-    row.innerHTML = `
-    <td>${s.full_name }</td>
-    <td>${s.class_name }</td>
-    <td>${s.section }</td>
+
+        row.innerHTML = `
+    <td>${s.full_name}</td>
+    <td>${s.class_name}</td>
+    <td>${s.section}</td>
     <td>${s.roll_number}</td>
     <td>${s.gender.toUpperCase()}</td>
     <td>${s.father_name}</td>
    
          <td>
-           <button type="button" class="btn btn-primary" onclick="startUpdate(${index})">Edit</button>
-           <button type="button" class="btn btn-primary" style="background: red;" onclick="delete_students(${index})">Delete</button>
+           <button type="button" style="background: none; border: none;" onclick="startUpdate(${index})">
+                    <img style="height: 25px; width: 25px; border-radius: 50%;" src="https://assets.streamlinehq.com/image/private/w_300,h_300,ar_1/f_auto/v1/icons/vector-icons-4/edit-flwwwz417de3u3nzvstgpu.png/edit-qtep4ftgzlsz4sl22a43m9.png?_a=DATAiZAAZAA0" alt="">
+           </button>
+           </td>
+           <td>
+           <button type="button" style="background: none; border: none; color: red;" onclick="delete_students(${index})">
+                    <img style="height: 25px; width: 25px; border-radius: 50%;" src="https://cdn-icons-png.flaticon.com/512/7709/7709786.png" alt="">
+           
+           </button>
+           </td>
+
+            <td>
+           <button type="button" style="background: none; border: none; color: red;" onclick="delete_students(${index})">
+                    <img style="height: 25px; width: 25px; border-radius: 50%;" src="https://www.svgrepo.com/show/532387/user-search.svg" alt="">
+           
+           </button>
            </td>
     `;
-    tbody.appendChild(row);
-});
+        tbody.appendChild(row);
+    });
 
 }
 
@@ -225,6 +248,7 @@ function delete_students(index) {
     deletingIndex = index;
     const s = students[index];
 
+    document.getElementById("deletestudentscard").style.display = 'block';
     document.getElementById("deletestudentclass").value = s.class_name;
     document.getElementById("Section").value = s.section;
     document.getElementById("Rollnumber").value = s.roll_number;
@@ -246,20 +270,20 @@ function delete_students(index) {
 
 
 // updating start button ---------
-function startUpdate(index) { 
-    
+function startUpdate(index) {
+
     editingIndex = index;
     const s = students[index];
-    
+
 
     document.getElementById("studentName").value = s.full_name;
     document.getElementById("section").value = s.section;
     document.getElementById("fatherName").value = s.father_name;
     document.getElementById("studentDOB").value = s.dob;
-    document.getElementById("session").value=s.total_fee;
+    document.getElementById("session").value = s.total_fee;
 
 
-    document.getElementById("addstudentclass").style.display= "none";
+    document.getElementById("addstudentclass").style.display = "none";
     document.getElementById("rollNumber").style.display = "none";
     document.getElementById("classheading").style.display = "none";
     document.getElementById("rollheading").style.display = "none";
@@ -343,7 +367,7 @@ function resetFormState() {
     document.getElementById("studentForm").style.border = "none";
     document.getElementById("addBtn").style.display = "inline-block";
     document.getElementById("addlabel").style.display = "inline-block";
-    document.getElementById("addstudentclass").style.display= "inline-block";
+    document.getElementById("addstudentclass").style.display = "inline-block";
     document.getElementById("rollNumber").style.display = "inline-block";
     document.getElementById("classheading").style.display = "inline-block";
     document.getElementById("rollheading").style.display = "inline-block";
@@ -370,7 +394,7 @@ function cancelUpdate() {
     document.getElementById("addBtn").style.display = "inline-block";
     document.getElementById("addlabel").style.display = "inline-block";
     document.getElementById("studentForm").style.border = "none";
-    document.getElementById("addstudentclass").style.display= "inline-block";
+    document.getElementById("addstudentclass").style.display = "inline-block";
     document.getElementById("rollNumber").style.display = "inline-block";
     document.getElementById("classheading").style.display = "inline-block";
     document.getElementById("rollheading").style.display = "inline-block";
@@ -410,7 +434,7 @@ function addfee() {
         dues: document.getElementById('Dues').value,
     };
 
-    if ( !feedata.roll_number || !feedata.class_name || !feedata.section || !feedata.paid_on || !feedata.month || !feedata.amount || !feedata.dues) {
+    if (!feedata.roll_number || !feedata.class_name || !feedata.section || !feedata.paid_on || !feedata.month || !feedata.amount || !feedata.dues) {
         showToast("Fill the fields first", "notify")
         return;
     }
@@ -432,7 +456,7 @@ function addfee() {
                 showToast("database error", "error");
                 return null;
             }
-            return res.text(); 
+            return res.text();
         })
         .then(data => {
             if (data === null) return;
@@ -462,10 +486,10 @@ let feedetails = [];
 
 async function fetchfeedetails(feedata) {
 
-   const data=feedata
+    const data = feedata
 
     try {
-        const url = "http://127.0.0.1:5000/feedetails"; 
+        const url = "http://127.0.0.1:5000/feedetails";
         const res = await fetch(url, {
             method: "POST",
             headers: {
@@ -516,16 +540,16 @@ function renderStudentsforfee(responseData) {
         tbody.appendChild(row);
     });
 
-    const firstrow=tbody.querySelector("tr:first-child");
+    const firstrow = tbody.querySelector("tr:first-child");
     if (firstrow) {
-        const duescell=firstrow.querySelector("td:nth-child(7)");
-        const originalContent=duescell.textContent;
-      duescell.innerHTML=`
+        const duescell = firstrow.querySelector("td:nth-child(7)");
+        const originalContent = duescell.textContent;
+        duescell.innerHTML = `
       <span style='color:red; font-weight:600'>${originalContent}</span>
       <span style='color: black;font-weight:100'>( Current )</span>
       `;
-      
-}
+
+    }
 }
 
 
@@ -534,19 +558,19 @@ function renderStudentsforfee(responseData) {
 
 
 async function fetchstudentsfee() {
-    const class_name=document.getElementById("feeclassfilter").value.trim()
+    const class_name = document.getElementById("feeclassfilter").value.trim()
     const roll_number = document.getElementById("feerollfilter").value
     const month = document.getElementById("feemonthfilter").value.trim()
-    
-    let payload={};
 
-    if (class_name) payload.class_name=class_name;
-    if (roll_number) payload.roll_number=roll_number;
-    if (month) payload.month=month;
+    let payload = {};
+
+    if (class_name) payload.class_name = class_name;
+    if (roll_number) payload.roll_number = roll_number;
+    if (month) payload.month = month;
 
 
-   try {
-        const url = "http://127.0.0.1:5000/allfeedetails"; 
+    try {
+        const url = "http://127.0.0.1:5000/allfeedetails";
         const res = await fetch(url, {
             method: "POST",
             headers: {
@@ -566,7 +590,7 @@ async function fetchstudentsfee() {
 
         handle_response(responseData);
 
-       
+
 
     } catch (err) {
         console.error("Error fetching fee details:", err);
@@ -576,22 +600,154 @@ async function fetchstudentsfee() {
 
 // handle response function 
 
-function handle_response(responseData){
+function handle_response(responseData) {
 
-    if (responseData.mode=='student_mode' ){
-        renderstudentview(responseData)
-    }
-    if (responseData.mode=='general_mode'){
-        generalrenderforfee(responseData)
-    }
-    else{
-        generalrenderforfee(responseData)
+
+    if (responseData[0].mode === "student_view") {
+
+        renderStudentView(responseData);
+        console.trace("render student was called")
+
+
+    } else {
+
+        generalrenderforfee(responseData);
+        console.trace("general render was called")
+        const section = document.getElementById("feecard");
+        section.style.display = "none";
+
     }
 }
+
+
+function renderStudentView(responseData) {
+
+    // ---- 1️⃣ UNHIDE THE SECTION ----
+    const section = document.getElementById("feecard");
+    section.style.display = "grid";   // or remove 'hidden' class if you use one
+
+    document.getElementById("feepagetable").style.display = "none";
+    backbtninfee.style.display = "inline-block";
+
+
+    const student = responseData || [];
+
+
+    // ---- 2️⃣ PROFILE CARD (TOP LEFT) ----
+    document.getElementById("nameofstudent").innerHTML =
+        student[0].name + ' <span class="tag">STUDENT</span>';
+
+    document.getElementById("rollofstudent").textContent =
+        "ROLL No: " + student[0].roll_no;
+
+    document.getElementById("classofstudent").textContent =
+        "CLASS: " + student[0].class;
+
+    document.querySelector(".phone").textContent =
+        student[0].phone || "";
+
+    // Profile image (Cloudinary URL expected)
+    const avatarImg = document.querySelector(".avatar img");
+    if (student[0].profile_pic) {
+        avatarImg.src = student[0].profile_pic;
+    }
+
+
+    // ---- 3️⃣ STUDENT CARD HEADER ----
+    document.querySelector(".student-meta h3").childNodes[0].nodeValue =
+        student[0].name + " ";
+
+    document.querySelector(".roll").textContent =
+        "Roll No: " + student[0].roll_no;
+
+    document.querySelector(".student-class").innerHTML =
+        student[0].class;
+
+    document.getElementById("totalFeeDisplay").textContent =
+        student[0].fee + " PKR";
+
+
+    // ---- 4️⃣ RENDER TABLE ----
+    const tbody = document.querySelector(".fee-table tbody");
+    tbody.innerHTML = "";
+
+    const hasTransactions = student.some(tx => tx.month !== null);
+
+    if (!hasTransactions) {
+        tbody.innerHTML =
+            `<tr><td colspan="6" style="text-align:center;">No transactions found</td></tr>`;
+    } else {
+
+        student.forEach(tx => {
+            const tr = document.createElement("tr");
+
+            tr.innerHTML = `
+                <td>${tx.month.toUpperCase()}</td>
+                <td>${tx.type || "-"}</td>
+                <td>${tx.reason || "-"}</td>
+                <td class="discount-col">${tx.discount || 0}</td>
+                <td style="color:green; font-weight:bold;">${tx.amount}</td>
+                <td>${tx.date}</td>
+            `;
+
+            tbody.appendChild(tr);
+        });
+    }
+
+
+    // ---- 5️⃣ RIGHT PANEL STATS ----
+
+    let totalPaid = 0;
+    student.forEach(tx => {
+        totalPaid += Number(tx.amount) || 0;
+    });
+    document.getElementById("studentTotalPaid").textContent =
+        totalPaid;
+
+    document.getElementById("studentTotalDue").textContent =
+        student[0].dues;
+
+
+    let status;
+    document.getElementById("studentStatus").textContent = status;
+    const badge = document.createElement("span");
+    if (totalPaid == 0) {
+        status = "Due";
+    }
+
+    else if (student[0].dues == 0) {
+        status = "Paid";
+    }
+    else {
+        status = "Partial";
+    }
+
+
+    badge.classList.add("status-badge");
+
+    if (status === "Paid") {
+        badge.classList.add("status-paid2")
+    }
+    else if (status === "Due") {
+        badge.classList.add("status-due2")
+    }
+    else {
+        badge.classList.add("status-partial2")
+    }
+
+    badge.textContent = status;
+    document.getElementById("studentStatus").appendChild(badge)
+}
+
+
 
 // General render  
 
 function generalrenderforfee(responseData) {
+
+
+
+
     const table = document.getElementById("generalfeeTable");
     table.innerHTML = ""; // reset
 
@@ -601,12 +757,10 @@ function generalrenderforfee(responseData) {
     }
 
     // Extract dynamic columns
-    const columns = [];
-    for (const key in responseData[0]){
-        if(responseData[0].hasOwnProperty(key))
-            columns.push(key);
-    }
+    const allowedColumns = ["name", "roll", "fee", "amount", "dues", "paid_on"];
 
+    const columns = Object.keys(responseData[0])
+        .filter(key => allowedColumns.includes(key));
 
 
     // Create header
@@ -619,8 +773,8 @@ function generalrenderforfee(responseData) {
         headerRow.appendChild(th);
     });
 
-    const statusHeader= document.createElement("th");
-    statusHeader.textContent= "Status";
+    const statusHeader = document.createElement("th");
+    statusHeader.textContent = "Status";
     headerRow.appendChild(statusHeader)
 
     thead.appendChild(headerRow);
@@ -628,67 +782,71 @@ function generalrenderforfee(responseData) {
 
     // Create body
     const tbody = document.createElement("tbody");
-    
+
 
     responseData.forEach(row => {
         const tr = document.createElement("tr");
+        tr.addEventListener("click", () => {
+            renderStudentBadge(row); // Send the row's info to the badge renderer
+        });
 
 
-        const statusCell= document.createElement("td");
+
+        const statusCell = document.createElement("td");
 
         const badge = document.createElement("span");
-            let status;
-            if (row.amount==0){
-                status="Due";
-            }
+        let status;
+        if (row.amount == 0) {
+            status = "Due";
+        }
 
-            else if (row.dues==0){
-                status="Paid";
-            }
-            else{
-                status="Partial";
-            }
-                
-            
-            badge.classList.add("status-badge");
-
-            if (status==="Paid"){
-                badge.classList.add("status-paid")
-            }
-            else if (status==="Due"){
-                badge.classList.add("status-due")
-            }
-            else{
-                badge.classList.add("status-partial")
-            }
-            
-            badge.textContent=status;
-            statusCell.appendChild(badge)
+        else if (row.dues == 0) {
+            status = "Paid";
+        }
+        else {
+            status = "Partial";
+        }
 
 
-            columns.forEach(column => {
-                
+        badge.classList.add("status-badge");
+
+        if (status === "Paid") {
+            badge.classList.add("status-paid")
+        }
+        else if (status === "Due") {
+            badge.classList.add("status-due")
+        }
+        else {
+            badge.classList.add("status-partial")
+        }
+
+        badge.textContent = status;
+        statusCell.appendChild(badge)
+
+
+        columns.forEach(column => {
+
             const td = document.createElement("td");
-            responseData.forEach(row=>{
-                const tr= document.createElement("tr");
-                let cellValue=row[column]??"";
-                if(column=="month"){
-                    cellValue=cellValue.toUpperCase();
+            responseData.forEach(row => {
+                const tr = document.createElement("tr");
+                let cellValue = row[column] ?? "";
+                if (column == "month") {
+                    cellValue = cellValue.toUpperCase();
                 }
-                if (column==="dues" && parseFloat(cellValue)>0){
-                    td.style.color="red";
-                    td.style.fontWeight="bold";
+                if (column === "dues" && parseFloat(cellValue) > 0) {
+                    td.style.color = "red";
+                    td.style.fontWeight = "bold";
                 }
-                if(column==="amount"){
-                    td.style.textAlign="left";
-                    td.style.color="green";
-                    td.style.fontWeight="bold";
+                if (column === "amount") {
+                    td.style.textAlign = "left";
+                    td.style.color = "green";
+                    td.style.fontWeight = "bold";
                 }
-                
+
             })
-            
+
             td.textContent = row[column] ?? "";
-            
+
             tr.appendChild(td);
             tr.appendChild(statusCell);
 
@@ -697,8 +855,10 @@ function generalrenderforfee(responseData) {
         tbody.appendChild(tr);
     });
 
+
     table.appendChild(tbody);
 }
+
 
 // Student render 
 
@@ -728,7 +888,7 @@ function generalrenderforfee(responseData) {
 //       <span style='color:red; font-weight:600'>${originalContent}</span>
 //       <span style='color: black;font-weight:100'>( Current )</span>
 //       `;
-      
+
 // }
 // }
 
@@ -833,6 +993,48 @@ function showToast(message, type = "success") {
         toast.className = "toast";
     }, 3000);
 }
+
+function backbtn_in_feepage() {
+
+    const section = document.getElementById("feecard");
+    section.style.display = "none";
+
+    document.getElementById("feepagetable").style.display = "block";
+    document.getElementById("backbtninfee").style.display = "none";
+}
+
+function studentcard() {
+    document.getElementById("studentForm").style.display = "block";
+    document.getElementById("studentForm").scrollIntoView({
+        behavior: "smooth"
+    });
+
+}
+
+function delete_student_card() {
+    document.getElementById("deletestudentscard").style.display = "block";
+    document.getElementById("deletestudentscard").scrollIntoView({
+        behavior: "smooth"
+    });
+    document.getElementById("studentName").value = "";
+    document.getElementById("addstudentclass").value = "";
+    document.getElementById("section").value = "";
+    document.getElementById("rollNumber").value = "";
+    document.getElementById("fatherName").value = "";
+    document.getElementById("phone").value = "";
+    document.getElementById("studentDOB").value = "";
+}
+
+function closeCard(id) {
+    document.getElementById(id).style.display = "none";
+    document.getElementById("deletestudentclass").value = "";
+    document.getElementById("Section").value = "";
+    document.getElementById("Rollnumber").value = "";
+}
+
+
+
+
 
 
 //         // Initialize
