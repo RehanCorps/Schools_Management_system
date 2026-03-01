@@ -964,3 +964,25 @@
     color: red;
     transform: scale(1.2);
 }
+
+
+.details-table{
+  width:auto;
+  border-collapse: collapse;
+}
+
+.details-table th{
+  text-align: left;
+  padding: 8px 12px;
+  color: grey;
+  font-weight:600;
+  width: 40%
+}
+
+.details-table td{
+  padding: 8px 12px;
+}
+
+.details-table tr{
+  border-bottom: 1px solid grey;
+}

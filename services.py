@@ -117,7 +117,11 @@ def get_students(class_name):
     sr.full_name,
     sr.father_name,
     sr.dob,
+    sr.b_form,
     sr.gender,
+    sr.photo,
+    sr.contact,
+    sr.address,
     e.section,
     e.roll_number,
     e.class_name
@@ -554,9 +558,8 @@ CREATE UNIQUE INDEX uq_active_class_roll
 
     
 if __name__=="__main__":
-    
-    query_run= run_query()
-    print(query_run)
+    result = get_students(9)
+    print(result)
 
 
 

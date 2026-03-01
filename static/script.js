@@ -197,7 +197,7 @@ function renderStudents() {
 
     const tbody = document.querySelector("#studentTable tbody");
     tbody.innerHTML = "";
-
+    
     if (!students || students.length === 0) {
         tbody.innerHTML = `<tr><td colspan="7">No students found</td></tr>`;
         return;
@@ -214,24 +214,19 @@ function renderStudents() {
     <td>${s.father_name}</td>
    
          <td>
-           <button type="button" style="background: none; border: none;" onclick="startUpdate(${index})">
-                    <img style="height: 25px; width: 25px; border-radius: 50%;" src="https://assets.streamlinehq.com/image/private/w_300,h_300,ar_1/f_auto/v1/icons/vector-icons-4/edit-flwwwz417de3u3nzvstgpu.png/edit-qtep4ftgzlsz4sl22a43m9.png?_a=DATAiZAAZAA0" alt="">
+           <button type="button" class="card-btn" style="background: none; border: none;">
+                    <img style="height: 25px; width: 25px; border-radius: 50%;" src="https://www.svgrepo.com/show/532387/user-search.svg" alt="">
            </button>
            </td>
            <td>
            <button type="button" style="background: none; border: none; color: red;" onclick="delete_students(${index})">
-                    <img style="height: 25px; width: 25px; border-radius: 50%;" src="https://cdn-icons-png.flaticon.com/512/7709/7709786.png" alt="">
-           
-           </button>
-           </td>
-
-            <td>
-           <button type="button" style="background: none; border: none; color: red;" onclick="delete_students(${index})">
-                    <img style="height: 25px; width: 25px; border-radius: 50%;" src="https://www.svgrepo.com/show/532387/user-search.svg" alt="">
-           
+                    <img style="height: 25px; width: 25px; border-radius: 50%; filter: brightness(0)  invert(20%);" src="https://cdn-icons-png.flaticon.com/512/7709/7709786.png" alt="">
            </button>
            </td>
     `;
+
+    const displaycardbtn=row.querySelector(".card-btn");
+    displaycardbtn.addEventListener("click",()=>{displaystudentcard(s)})
         tbody.appendChild(row);
     });
 
@@ -262,7 +257,7 @@ function delete_students(index) {
 }
 
 
-// =----------------------------------
+// -----------------------------------
 // Update students 
 // -----------------------------------
 
@@ -270,11 +265,12 @@ function delete_students(index) {
 
 
 // updating start button ---------
-function startUpdate(index) {
+function startUpdate(students) {
 
-    editingIndex = index;
-    const s = students[index];
+    console.log(students)
+    const s = students;
 
+    document.getElementById("studentForm").style.display = 'block';
 
     document.getElementById("studentName").value = s.full_name;
     document.getElementById("section").value = s.section;
@@ -546,7 +542,7 @@ function renderStudentsforfee(responseData) {
         const originalContent = duescell.textContent;
         duescell.innerHTML = `
       <span style='color:red; font-weight:600'>${originalContent}</span>
-      <span style='color: black;font-weight:100'>( Current )</span>
+      <span style='color: black;font-weight:300'>( Current )</span>
       `;
 
     }
@@ -657,8 +653,7 @@ function renderStudentView(responseData) {
     document.querySelector(".student-meta h3").childNodes[0].nodeValue =
         student[0].name + " ";
 
-    document.querySelector(".roll").textContent =
-        "Roll No: " + student[0].roll_no;
+    
 
     document.querySelector(".student-class").innerHTML =
         student[0].class;
@@ -1032,7 +1027,11 @@ function closeCard(id) {
     document.getElementById("Rollnumber").value = "";
 }
 
+// display student crad---- 
 
+function displaystudentcard(s){
+
+}
 
 
 

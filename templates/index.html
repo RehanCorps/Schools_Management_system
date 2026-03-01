@@ -117,7 +117,7 @@
                             src="https://static.thenounproject.com/png/847983-200.png" alt="">
                         Delete Student
                     </button>
-                   
+
                 </div>
             </div>
 
@@ -163,158 +163,203 @@
                 </table>
             </div>
 
+            <!-- ===============  -->
 
-            <div class="card" style="display: none; position: relative;" id="studentForm">
-                <button class="close-btn" onclick="closeCard('studentForm')">
-                    &times;
-                </button>
-                <h3 id="addlabel">Add New Student</h3>
-                <h3 id="updatelabel" style="display: none;">Update Student</h3>
+           
+        <!-- ------------card  -->
 
-                <div class="image-upload-container">
+        <div class="card" style="display: none; position: relative;" id="studentForm">
+            <button class="close-btn" onclick="closeCard('studentForm')">
+                &times;
+            </button>
+            <h3 id="addlabel">Add New Student</h3>
+            <h3 id="updatelabel" style="display: none;">Update Student</h3>
 
-                    <label for="imageInput" class="upload-box">
-                        <img id="previewImage"
-                            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT-HmAlYRaMiTx6PqSGcL9ifkAFxWHVPvhiHQ&s"
-                            alt="Preview">
+            <div class="image-upload-container">
 
-                        <span class="upload-text">Click to upload image</span>
-                    </label>
+                <label for="imageInput" class="upload-box">
+                    <img id="previewImage"
+                        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT-HmAlYRaMiTx6PqSGcL9ifkAFxWHVPvhiHQ&s"
+                        alt="Preview">
 
-                    <input type="file" id="imageInput" accept="image/png, image/jpeg, image/webp">
+                    <span class="upload-text">Click to upload image</span>
+                </label>
 
-                </div>
-                <script>
-                    document.getElementById("imageInput")
-                        .addEventListener("change", function () {
+                <input type="file" id="imageInput" accept="image/png, image/jpeg, image/webp">
 
-                            const file = this.files[0];
-                            if (!file) return;
+            </div>
+            <script>
+                document.getElementById("imageInput")
+                    .addEventListener("change", function () {
 
-                            const reader = new FileReader();
+                        const file = this.files[0];
+                        if (!file) return;
 
-                            reader.onload = function (e) {
-                                document.getElementById("previewImage").src = e.target.result;
-                            };
+                        const reader = new FileReader();
 
-                            reader.readAsDataURL(file);
-                        });
-                </script>
-                <div class="form-grid">
+                        reader.onload = function (e) {
+                            document.getElementById("previewImage").src = e.target.result;
+                        };
 
-                    <label style="font-size:16px;">Name
-                        <input type="text" id="studentName" placeholder="Student Name" style="margin:5px 0;">
-                    </label>
+                        reader.readAsDataURL(file);
+                    });
+            </script>
+            <div class="form-grid">
 
-                    <label style="font-size:16px;">Date of Birth
-                        <input type="date" id="studentDOB" style="margin:5px 0;">
-                    </label>
+                <label style="font-size:16px;">Name
+                    <input type="text" id="studentName" placeholder="Student Name" style="margin:5px 0;">
+                </label>
 
-                    <label style="font-size:16px;">B-form No
-                        <input type="text" id="bform" maxlength="15" placeholder="12345-1234567-1" style="margin:5px 0;"
-                            required>
-                    </label>
-                    <script>document.getElementById("bform").addEventListener("input", function () {
+                <label style="font-size:16px;">Date of Birth
+                    <input type="date" id="studentDOB" style="margin:5px 0;">
+                </label>
 
-                            let digits = this.value.replace(/\D/g, ""); // Remove non-digits
+                <label style="font-size:16px;">B-form No
+                    <input type="text" id="bform" maxlength="15" placeholder="12345-1234567-1" style="margin:5px 0;"
+                        required>
+                </label>
+                <script>document.getElementById("bform").addEventListener("input", function () {
 
-                            if (digits.length > 13) {
-                                digits = digits.slice(0, 13);
-                            }
+                        let digits = this.value.replace(/\D/g, ""); // Remove non-digits
 
-                            let formatted = "";
+                        if (digits.length > 13) {
+                            digits = digits.slice(0, 13);
+                        }
 
-                            if (digits.length > 0) {
-                                formatted = digits.slice(0, 5);
-                            }
+                        let formatted = "";
 
-                            if (digits.length > 5) {
-                                formatted += "-" + digits.slice(5, 12);
-                            }
+                        if (digits.length > 0) {
+                            formatted = digits.slice(0, 5);
+                        }
 
-                            if (digits.length > 12) {
-                                formatted += "-" + digits.slice(12, 13);
-                            }
+                        if (digits.length > 5) {
+                            formatted += "-" + digits.slice(5, 12);
+                        }
 
-                            this.value = formatted;
-                        });</script>
+                        if (digits.length > 12) {
+                            formatted += "-" + digits.slice(12, 13);
+                        }
 
-                    <label style="font-size:16px;">Gender
-                        <select id="studentGender" required style="margin:5px 0;">
-                            <option value="male">🚹Male</option>
-                            <option value="female">🚺Female</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </label>
+                        this.value = formatted;
+                    });</script>
 
-                    <label id="classheading" style="font-size:16px;">Class
-                        <select id="addstudentclass" required style="margin:5px 0;">
-                            <option value="9">9</option>
-                            <option value="10">10</option>
-                        </select>
-                    </label>
+                <label style="font-size:16px;">Gender
+                    <select id="studentGender" required style="margin:5px 0;">
+                        <option value="male">🚹Male</option>
+                        <option value="female">🚺Female</option>
+                        <option value="other">Other</option>
+                    </select>
+                </label>
 
-                    <label style="font-size:16px;">Section
-                        <input type="text" id="section" placeholder="e.g., A" style="margin:5px 0;">
-                    </label>
+                <label id="classheading" style="font-size:16px;">Class
+                    <select id="addstudentclass" required style="margin:5px 0;">
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                    </select>
+                </label>
 
-                    <label id="rollheading" style="font-size:16px;">Roll Number
-                        <input type="text" id="rollNumber" placeholder="e.g., A-123" style="margin:5px 0;">
-                    </label>
+                <label style="font-size:16px;">Section
+                    <input type="text" id="section" placeholder="e.g., A" style="margin:5px 0;">
+                </label>
 
-                    <label style="font-size:16px;">Session
-                        <input type="text" id="session" placeholder="e.g., 2024-25" style="margin:5px 0;">
-                    </label>
+                <label id="rollheading" style="font-size:16px;">Roll Number
+                    <input type="text" id="rollNumber" placeholder="e.g., A-123" style="margin:5px 0;">
+                </label>
 
-                    <label style="font-size:16px;">Total Fee
-                        <input type="number" id="totalFee" placeholder="e.g., 2000" style="margin:5px 0;">
-                    </label>
-                </div>
+                <label style="font-size:16px;">Session
+                    <input type="text" id="session" placeholder="e.g., 2024-25" style="margin:5px 0;">
+                </label>
 
-                <h3 style="font-size:18px;">Father/Guardian info</h3>
-
-                <div class="form-grid">
-                    <label style="font-size:16px;">Name
-                        <input type="text" id="fatherName" placeholder="Full Name" style="margin:5px 0;">
-                    </label>
-
-
-                    <label style="font-size:16px;">Phone Number
-                        <input type="text" id="phone" placeholder="e.g., 1234567890" style="margin:5px 0;">
-                    </label>
-
-                    <label style="font-size:16px;">Address
-                        <input type="text" id="address" placeholder="Full Address" style="margin:5px 0;">
-                    </label>
-
-                </div>
-
-                <button class="btn2 btn-primary" style="background: green;"
-                    onmouseover="this.style.background='darkgreen'" onmouseout="this.style.background='green'"
-                    type="submit" id="addBtn" onclick="addStudent()">Add
-                    Student</button>
-
-                <button class="btn2 btn-primary" id="updateBtn" style="display:none"
-                    onclick="updateStudent(event)">Update
-                    Student</button>
-
-                <button class="btn2 btn-primary" type="button" id="cancelBtn" style="display:none; background: #991b1b"
-                    onclick="cancelUpdate()">
-                    Cancel
-                </button>
+                <label style="font-size:16px;">Total Fee
+                    <input type="number" id="totalFee" placeholder="e.g., 2000" style="margin:5px 0;">
+                </label>
             </div>
 
+            <h3 style="font-size:18px;">Father/Guardian info</h3>
 
-            <div class="card" id="deletestudentscard" style="display: none; position: relative;">
+            <div class="form-grid">
+                <label style="font-size:16px;">Name
+                    <input type="text" id="fatherName" placeholder="Full Name" style="margin:5px 0;">
+                </label>
 
-                <button class="close-btn" onclick="closeCard('deletestudentscard')">
-                    &times;
-                </button>
-                <h3>Delete a Student</h3>
+
+                <label style="font-size:16px;">Phone Number
+                    <input type="text" id="phone" placeholder="e.g., 1234567890" style="margin:5px 0;">
+                </label>
+
+                <label style="font-size:16px;">Address
+                    <input type="text" id="address" placeholder="Full Address" style="margin:5px 0;">
+                </label>
+
+            </div>
+
+            <button class="btn2 btn-primary" style="background: green;" onmouseover="this.style.background='darkgreen'"
+                onmouseout="this.style.background='green'" type="submit" id="addBtn" onclick="addStudent()">Add
+                Student</button>
+
+            <button class="btn2 btn-primary" id="updateBtn" style="display:none" onclick="updateStudent(event)">Update
+                Student</button>
+
+            <button class="btn2 btn-primary" type="button" id="cancelBtn" style="display:none; background: #991b1b"
+                onclick="cancelUpdate()">
+                Cancel
+            </button>
+        </div>
+
+
+        <div class="card" id="deletestudentscard" style="display: none; position: relative;">
+
+            <button class="close-btn" onclick="closeCard('deletestudentscard')">
+                &times;
+            </button>
+            <h3>Delete a Student</h3>
+            <div class="form-grid">
+
+                <h3 style="font-size: 16px;"> Class
+                    <select style="margin: 5px 0;" name="status" id="deletestudentclass" required>
+
+                        <option value="9">
+                            9
+                        </option>
+                        <option value="10">
+                            10
+                        </option>
+                    </select>
+                </h3>
+                <h3 style="font-size: 16px"> Section
+                    <input style="margin: 5px 0;" type="text" id="Section" placeholder="e.g., A">
+                </h3>
+                <h3 style="font-size: 16px"> Roll Number
+                    <input style="margin: 5px 0;" type="text" id="Rollnumber" placeholder="e.g., A-123">
+                </h3>
+            </div>
+            <button class="btn2 btn-primary" style="background-color: #991b1b;"
+                onmouseover="this.style.background='darkred'" onmouseout="this.style.background='#991b1b'"
+                onclick="openConfirm()">Delete
+                Student</button>
+            <button class="btn2 btn-primary" type="button" id="canceldeleteBtn"
+                style="display:none; background: #0044d6" onclick="canceldelete()">
+                Cancel Delete
+            </button>
+
+        </div>
+
+
+
+    </div>
+
+    <!-- students list page  -->
+
+    <!-- Fees Page -->
+    <section>
+        <div id="Managefees" class="page">
+            <h2>Fee Status Management</h2>
+
+            <div class="card">
+                <h3>Add Record</h3>
                 <div class="form-grid">
-
                     <h3 style="font-size: 16px;"> Class
-                        <select style="margin: 5px 0;" name="status" id="deletestudentclass" required>
+                        <select style="margin: 5px 0;" name="status" id="classforfee" required>
 
                             <option value="9">
                                 9
@@ -325,403 +370,90 @@
                         </select>
                     </h3>
                     <h3 style="font-size: 16px"> Section
-                        <input style="margin: 5px 0;" type="text" id="Section" placeholder="e.g., A">
+                        <input style="margin: 5px 0;" type="text" id="Sectionforfee" placeholder="e.g., A">
                     </h3>
                     <h3 style="font-size: 16px"> Roll Number
-                        <input style="margin: 5px 0;" type="text" id="Rollnumber" placeholder="e.g., A-123">
+                        <input style="margin: 5px 0;" type="text" id="Rollnumberforfee" placeholder="e.g., A-123">
                     </h3>
-                </div>
-                <button class="btn2 btn-primary" style="background-color: #991b1b;"
-                    onmouseover="this.style.background='darkred'" onmouseout="this.style.background='#991b1b'"
-                    onclick="openConfirm()">Delete
-                    Student</button>
-                <button class="btn2 btn-primary" type="button" id="canceldeleteBtn"
-                    style="display:none; background: #0044d6" onclick="canceldelete()">
-                    Cancel Delete
-                </button>
+                    <h3 style="font-size: 16px"> Date
+                        <input style="margin: 5px 0;" type="date" id="feedate" placeholder="MM/DD/YYYY">
+                    </h3>
+                    <h3 style="font-size: 16px;"> Month
+                        <select style="margin: 5px 0;" id="feemonth" required>
 
-            </div>
+                            <option value="january">
+                                January
+                            </option>
+                            <option value="feburary">
+                                Feburary
+                            </option>
+                            <option value="march">
+                                March
+                            </option>
+                            <option value="april">
+                                April
+                            </option>
+                            <option value="may">
+                                May
+                            </option>
+                            <option value="june">
+                                June
+                            </option>
+                            <option value="july">
+                                July
+                            </option>
+                            <option value="august">
+                                August
+                            </option>
+                            <option value="september">
+                                September
+                            </option>
+                            <option value="october">
+                                October
+                            </option>
+                            <option value="november">
+                                November
+                            </option>
+                            <option value="december">
+                                December
+                            </option>
+                        </select>
+                    </h3>
+                    <h3 style="font-size: 16px"> Amount paid
+                        <input style="margin: 5px 0;" type="number" id="amount">
+                    </h3>
+                    <h3 style="font-size: 16px"> Due amount
+                        <input style="margin: 5px 0;" type="number" id="Dues" </h3>
+                        <h3 style="font-size: 16px;"> Payment
+                            <select style="margin: 5px 0;" id="paymentmethod" required>
 
-
-
-        </div>
-
-        <!-- students list page  -->
-
-        <!-- Fees Page -->
-        <section>
-            <div id="Managefees" class="page">
-                <h2>Fee Status Management</h2>
-
-                <div class="card">
-                    <h3>Add Record</h3>
-                    <div class="form-grid">
-                        <h3 style="font-size: 16px;"> Class
-                            <select style="margin: 5px 0;" name="status" id="classforfee" required>
-
-                                <option value="9">
-                                    9
+                                <option value="cash">
+                                    Cash
                                 </option>
-                                <option value="10">
-                                    10
-                                </option>
-                            </select>
-                        </h3>
-                        <h3 style="font-size: 16px"> Section
-                            <input style="margin: 5px 0;" type="text" id="Sectionforfee" placeholder="e.g., A">
-                        </h3>
-                        <h3 style="font-size: 16px"> Roll Number
-                            <input style="margin: 5px 0;" type="text" id="Rollnumberforfee" placeholder="e.g., A-123">
-                        </h3>
-                        <h3 style="font-size: 16px"> Date
-                            <input style="margin: 5px 0;" type="date" id="feedate" placeholder="MM/DD/YYYY">
-                        </h3>
-                        <h3 style="font-size: 16px;"> Month
-                            <select style="margin: 5px 0;" id="feemonth" required>
-
-                                <option value="january">
-                                    January
-                                </option>
-                                <option value="feburary">
-                                    Feburary
-                                </option>
-                                <option value="march">
-                                    March
-                                </option>
-                                <option value="april">
-                                    April
-                                </option>
-                                <option value="may">
-                                    May
-                                </option>
-                                <option value="june">
-                                    June
-                                </option>
-                                <option value="july">
-                                    July
-                                </option>
-                                <option value="august">
-                                    August
-                                </option>
-                                <option value="september">
-                                    September
-                                </option>
-                                <option value="october">
-                                    October
-                                </option>
-                                <option value="november">
-                                    November
-                                </option>
-                                <option value="december">
-                                    December
+                                <option value="online">
+                                    Online
                                 </option>
                             </select>
                         </h3>
-                        <h3 style="font-size: 16px"> Amount paid
-                            <input style="margin: 5px 0;" type="number" id="amount">
-                        </h3>
-                        <h3 style="font-size: 16px"> Due amount
-                            <input style="margin: 5px 0;" type="number" id="Dues" </h3>
-                            <h3 style="font-size: 16px;"> Payment
-                                <select style="margin: 5px 0;" id="paymentmethod" required>
-
-                                    <option value="cash">
-                                        Cash
-                                    </option>
-                                    <option value="online">
-                                        Online
-                                    </option>
-                                </select>
-                            </h3>
-                    </div>
-                    <button class="btn btn-primary" style="background-color: green;" onclick="addfee()">Add</button>
-
                 </div>
-
-                <div class="card" id="showfeetable" style="display: none; border-radius: 30px;">
-                    <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
-
-                    </div>
-                    <table id="feeTable">
-                        <thead id="tablehead">
-                            <tr>
-                                <th style="border-top-left-radius: 20px;">Name</th>
-                                <th>Class</th>
-                                <th>Roll no.</th>
-                                <th>Month</th>
-                                <th>Amount Paid</th>
-                                <th>Paid on</th>
-                                <th style="border-top-right-radius: 20px;">Dues</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-
-
-        </section>
-
-        <!-- ============Fee table of stundents======== -->
-
-
-        <div id="feestablepage" class="page">
-
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="number" id="totalfeecollection">0</div>
-                    <h3>Total Fee Paid</h3>
-                </div>
-                <div class="stat-card">
-                    <div class="number" id="totalpendingdues">0</div>
-                    <h3>Total Dues </h3>
-                </div>
-                <div class="stat-card">
-                    <div class="number" id="totalpendingstudents">$0</div>
-                    <h3>Status</h3>
-                </div>
-            </div>
-
-            <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
-
-                <select style="width: 20%;" id="feeclassfilter">
-                    <option value="9">Class 9</option>
-                    <option value="10">Class 10</option>
-                </select>
-                <select style="width: 20%;" id="feemonthfilter">
-
-                    <option value="january">
-                        January
-                    </option>
-                    <option value="feburary">
-                        Feburary
-                    </option>
-                    <option value="march">
-                        March
-                    </option>
-                    <option value="april">
-                        April
-                    </option>
-                    <option value="may">
-                        May
-                    </option>
-                    <option value="june">
-                        June
-                    </option>
-                    <option value="july">
-                        July
-                    </option>
-                    <option value="august">
-                        August
-                    </option>
-                    <option value="september">
-                        September
-                    </option>
-                    <option value="october">
-                        October
-                    </option>
-                    <option value="november">
-                        November
-                    </option>
-                    <option value="december">
-                        December
-                    </option>
-                </select>
-                <input style="margin: 5px 20px; width:30%" id="feerollfilter" placeholder="Roll num (Optional)">
-
-                <button onclick="fetchstudentsfee()" class="btn btn-primary">
-                    Refresh
-                </button>
+                <button class="btn2 btn-primary" style="background-color: green;" onclick="addfee()">Add</button>
 
             </div>
 
-            <div>
-                <div class="topbar">
+            <div class="card" id="showfeetable" style="display: none; border-radius: 30px;">
+                <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
 
-                    <div class="topbar-actions">
-                        <button id="backbtninfee" style="display: none;" class="btn" onclick="backbtn_in_feepage()">
-                            ⬉ Back
-                        </button>
-                        <button class="btn">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <polyline points="6 9 6 2 18 2 18 9" />
-                                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
-                                <rect x="6" y="14" width="12" height="8" />
-                            </svg>
-                            Print
-                        </button>
-                        <button class="btn">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                            </svg>
-                            Send Reminder
-                        </button>
-                        <button class="btn">Show Advance Fee</button>
-                    </div>
                 </div>
-
-                <div class="main" id="feecard" style="display: none;">
-                    <div class="left-col">
-
-                        <div class="profile-card">
-                            <div class="avatar-wrap">
-                                <div class="avatar"><img
-                                        src="https://res.cloudinary.com/dhcayqpqr/image/upload/v1771685889/movde8tv3nwycpx2lwnf.jpg"
-                                        style="height: 100px; width: 100px; border-radius: 60%;" alt=""></div>
-                            </div>
-                            <div class="profile-info">
-                                <h2 id="nameofstudent">Ayesha Bibi <span class="tag">PARENT</span></h2>
-                                <div class="sub" id="rollofstudent">ID: AB-0042 &nbsp;|&nbsp; Flat 45 Block B
-                                    Lahore
-                                </div>
-                                <div class="sub" id="classofstudent">ID: AB-0042 &nbsp;|&nbsp; Flat 45 Block B
-                                    Lahore</div>
-                                <div class="toggle-row">
-                                    <label class="toggle">
-                                        <input type="checkbox" id="discountToggle">
-                                        <span class="slider"></span>
-                                    </label>
-                                    <span class="toggle-label">Show Discount</span>
-                                </div>
-                            </div>
-                            <div class="profile-meta">
-                                <div class="phone">03217654321</div>
-                            </div>
-                        </div>
-
-                        <div class="student-card">
-                            <div class="student-header">
-                                <div class="student-avatar">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                                        <circle cx="12" cy="7" r="4" />
-                                    </svg>
-                                </div>
-                                <div class="student-meta">
-                                    <h3>
-                                        Zainab Bibi
-                                        <button class="eye-btn">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                                <circle cx="12" cy="12" r="3" />
-                                            </svg>
-                                        </button>
-                                    </h3>
-                                    <div class="roll">Roll No: 201</div>
-                                </div>
-                                <div>
-                                    <div class="student-class">Eight <span>Class A</span></div>
-                                </div>
-                                <div class="total-fee">
-                                    <div class="amount" id="totalFeeDisplay">81,331 PKR</div>
-                                    <div class="label">Total Fee</div>
-                                </div>
-                            </div>
-
-                            <div class="table-wrap">
-                                <table class="fee-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Month</th>
-                                            <th>Type</th>
-                                            <th>Reason</th>
-                                            <th class="discount-col">Add. Discount</th>
-                                            <th>Total Paid</th>
-                                            <th>Date</th>
-
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="right-panel">
-                        <div class="stat-card">
-                            <div class="number" style="color: green; font-weight: 600;" id="studentTotalPaid">0
-                            </div>
-                            <h3>Total Fee Paid</h3>
-                        </div>
-                        <div class="stat-card">
-                            <div class="number" style="color: red; font-weight: 600;" id="studentTotalDue">0
-                            </div>
-                            <h3>Total Dues </h3>
-                        </div>
-                        <div class="stat-card">
-                            <div class="number" id="studentStatus">$0</div>
-                            <h3>Status</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="card" id="feepagetable" style="display: block; border-radius: 30px;">
-
-                <table id="generalfeeTable" class="fee-table">
-                </table>
-            </div>
-        </div>
-
-
-        <!-- Performance Page -->
-        <div id="performance" class="page">
-            <h2>Class Performance</h2>
-            <div class="chart-grid">
-                <div class="card">
-                    <h3>Average Scores by Class</h3>
-                    <div class="chart-container">
-                        <canvas id="performanceChart"></canvas>
-                    </div>
-                </div>
-                <div class="card">
-                    <h3>Student Count by Class</h3>
-                    <div class="chart-container">
-                        <canvas id="studentCountChart"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <h3>Class Details</h3>
-                <table id="performanceTable">
-                    <thead>
+                <table id="feeTable">
+                    <thead id="tablehead">
                         <tr>
+                            <th style="border-top-left-radius: 20px;">Name</th>
                             <th>Class</th>
-                            <th>Average Score</th>
-                            <th>Total Students</th>
-                            <th>Performance</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Teachers Page -->
-        <div id="teachers" class="page">
-            <h2>Manage Teachers</h2>
-            <div class="card">
-                <h3>Add New Teacher</h3>
-                <div class="form-grid">
-                    <input type="text" id="teacherName" placeholder="Teacher Name">
-                    <input type="text" id="teacherSubject" placeholder="Subject">
-                    <input type="text" id="teacherClass" placeholder="Class">
-                    <button class="btn btn-primary" onclick="addTeacher()">Add Teacher</button>
-                </div>
-            </div>
-            <div class="card">
-                <h3>Teacher List</h3>
-                <table id="teacherTable">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Subject</th>
-                            <th>Class</th>
-                            <th>Actions</th>
+                            <th>Roll no.</th>
+                            <th>Month</th>
+                            <th>Amount Paid</th>
+                            <th>Paid on</th>
+                            <th style="border-top-right-radius: 20px;">Dues</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -730,34 +462,303 @@
         </div>
 
 
-        <!-- School Info Page -->
-        <div id="school" class="page">
-            <h2>School Information</h2>
-            <div class="chart-grid">
-                <div class="card">
-                    <h3>⏰ School Timings</h3>
-                    <input type="text" id="schoolTimings" value="8:00 AM - 2:00 PM">
-                    <button class="btn btn-primary" style="margin-top: 15px;" onclick="updateTimings()">Update
-                        Timings</button>
-                </div>
-                <div class="card">
-                    <h3>📅 Add Event</h3>
-                    <input type="text" id="eventInput" placeholder="Enter event">
-                    <button class="btn btn-success" style="margin-top: 15px;" onclick="addEvent()">Add
-                        Event</button>
+    </section>
+
+    <!-- ============Fee table of stundents======== -->
+
+
+    <div id="feestablepage" class="page">
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="number" id="totalfeecollection">0</div>
+                <h3>Total Fee Paid</h3>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="totalpendingdues">0</div>
+                <h3>Total Dues </h3>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="totalpendingstudents">$0</div>
+                <h3>Status</h3>
+            </div>
+        </div>
+
+        <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
+
+            <select style="width: 20%;" id="feeclassfilter">
+                <option value="9">Class 9</option>
+                <option value="10">Class 10</option>
+            </select>
+            <select style="width: 20%;" id="feemonthfilter">
+
+                <option value="january">
+                    January
+                </option>
+                <option value="feburary">
+                    Feburary
+                </option>
+                <option value="march">
+                    March
+                </option>
+                <option value="april">
+                    April
+                </option>
+                <option value="may">
+                    May
+                </option>
+                <option value="june">
+                    June
+                </option>
+                <option value="july">
+                    July
+                </option>
+                <option value="august">
+                    August
+                </option>
+                <option value="september">
+                    September
+                </option>
+                <option value="october">
+                    October
+                </option>
+                <option value="november">
+                    November
+                </option>
+                <option value="december">
+                    December
+                </option>
+            </select>
+            <input style="margin: 5px 20px; width:30%" id="feerollfilter" placeholder="Roll num (Optional)">
+
+            <button onclick="fetchstudentsfee()" class="btn btn-primary">
+                Refresh
+            </button>
+
+        </div>
+        <!-- card----- -->
+        <div>
+            <div class="topbar">
+
+                <div class="topbar-actions">
+                    <button id="backbtninfee" style="display: none;" class="btn" onclick="backbtn_in_feepage()">
+                        ⬉ Back
+                    </button>
+                    <button class="btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polyline points="6 9 6 2 18 2 18 9" />
+                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                            <rect x="6" y="14" width="12" height="8" />
+                        </svg>
+                        Print
+                    </button>
+                    <button class="btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                        </svg>
+                        Send Reminder
+                    </button>
+                    <button class="btn">Show Advance Fee</button>
                 </div>
             </div>
-            <div class="chart-grid">
-                <div class="card">
-                    <h3>Upcoming Events</h3>
-                    <ul class="event-list" id="eventList"></ul>
+
+            <div class="main" id="feecard" style="display: none;">
+                <div class="left-col">
+
+                    <div class="profile-card">
+                        <div class="avatar-wrap">
+                            <div class="avatar"><img
+                                    src="https://res.cloudinary.com/dhcayqpqr/image/upload/v1771685889/movde8tv3nwycpx2lwnf.jpg"
+                                    style="height: 100px; width: 100px; border-radius: 60%;" alt=""></div>
+                        </div>
+                        <div class="profile-info">
+                            <h2 id="nameofstudent">Ayesha Bibi <span class="tag">PARENT</span></h2>
+                            <div class="sub" id="rollofstudent">ID: AB-0042 &nbsp;|&nbsp; Flat 45 Block B
+                                Lahore
+                            </div>
+                            <div class="sub" id="classofstudent">ID: AB-0042 &nbsp;|&nbsp; Flat 45 Block B
+                                Lahore</div>
+                            <div class="toggle-row">
+                                <label class="toggle">
+                                    <input type="checkbox" id="discountToggle">
+                                    <span class="slider"></span>
+                                </label>
+                                <span class="toggle-label">Show Discount</span>
+                            </div>
+                        </div>
+                        <div class="profile-meta">
+                            <div class="phone">03217654321</div>
+                        </div>
+                    </div>
+
+                    <div class="student-card">
+                        <div class="student-header">
+                            <div class="student-avatar">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                    <circle cx="12" cy="7" r="4" />
+                                </svg>
+                            </div>
+                            <div class="student-meta">
+                                <h3>
+                                    Zainab Bibi
+                                    <button class="eye-btn">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                            <circle cx="12" cy="12" r="3" />
+                                        </svg>
+                                    </button>
+                                </h3>
+                            </div>
+                            <div>
+                                <div class="student-class">Eight <span>Class A</span></div>
+                            </div>
+                            <div class="total-fee">
+                                <div class="amount" id="totalFeeDisplay">81,331 PKR</div>
+                                <div class="label">Total Fee</div>
+                            </div>
+                        </div>
+
+                        <div class="table-wrap">
+                            <table class="fee-table">
+                                <thead>
+                                    <tr>
+                                        <th>Month</th>
+                                        <th>Type</th>
+                                        <th>Reason</th>
+                                        <th class="discount-col">Add. Discount</th>
+                                        <th>Total Paid</th>
+                                        <th>Date</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-                <div class="card">
-                    <h3>Schedules</h3>
-                    <ul class="event-list" id="scheduleList"></ul>
+
+                <div class="right-panel">
+                    <div class="stat-card">
+                        <div class="number" style="color: green; font-weight: 600;" id="studentTotalPaid">0
+                        </div>
+                        <h3>Total Fee Paid</h3>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number" style="color: red; font-weight: 600;" id="studentTotalDue">0
+                        </div>
+                        <h3>Total Dues </h3>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number" id="studentStatus">$0</div>
+                        <h3>Status</h3>
+                    </div>
                 </div>
             </div>
         </div>
+        <!-- ------------card -----  -->
+
+        <div class="card" id="feepagetable" style="display: block; border-radius: 30px;">
+
+            <table id="generalfeeTable" class="fee-table">
+            </table>
+        </div>
+    </div>
+
+
+    <!-- Performance Page -->
+    <div id="performance" class="page">
+        <h2>Class Performance</h2>
+        <div class="chart-grid">
+            <div class="card">
+                <h3>Average Scores by Class</h3>
+                <div class="chart-container">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Student Count by Class</h3>
+                <div class="chart-container">
+                    <canvas id="studentCountChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Class Details</h3>
+            <table id="performanceTable">
+                <thead>
+                    <tr>
+                        <th>Class</th>
+                        <th>Average Score</th>
+                        <th>Total Students</th>
+                        <th>Performance</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Teachers Page -->
+    <div id="teachers" class="page">
+        <h2>Manage Teachers</h2>
+        <div class="card">
+            <h3>Add New Teacher</h3>
+            <div class="form-grid">
+                <input type="text" id="teacherName" placeholder="Teacher Name">
+                <input type="text" id="teacherSubject" placeholder="Subject">
+                <input type="text" id="teacherClass" placeholder="Class">
+                <button class="btn btn-primary" onclick="addTeacher()">Add Teacher</button>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Teacher List</h3>
+            <table id="teacherTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Subject</th>
+                        <th>Class</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- School Info Page -->
+    <div id="school" class="page">
+        <h2>School Information</h2>
+        <div class="chart-grid">
+            <div class="card">
+                <h3>⏰ School Timings</h3>
+                <input type="text" id="schoolTimings" value="8:00 AM - 2:00 PM">
+                <button class="btn btn-primary" style="margin-top: 15px;" onclick="updateTimings()">Update
+                    Timings</button>
+            </div>
+            <div class="card">
+                <h3>📅 Add Event</h3>
+                <input type="text" id="eventInput" placeholder="Enter event">
+                <button class="btn btn-success" style="margin-top: 15px;" onclick="addEvent()">Add
+                    Event</button>
+            </div>
+        </div>
+        <div class="chart-grid">
+            <div class="card">
+                <h3>Upcoming Events</h3>
+                <ul class="event-list" id="eventList"></ul>
+            </div>
+            <div class="card">
+                <h3>Schedules</h3>
+                <ul class="event-list" id="scheduleList"></ul>
+            </div>
+        </div>
+    </div>
     </div>
 
 
