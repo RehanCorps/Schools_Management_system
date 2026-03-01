@@ -436,25 +436,47 @@ def fee_report(data):
     if has_roll and has_class and not has_month:
         query = """
         SELECT 
-            sr.full_name AS full_name,
-            e.roll_number,
-            f.month,
-            SUM(f.amount) AS amount,
-            e.total_fee,
-            (SELECT f2.dues
-            FROM fee_records f2
-            WHERE f2.enrollment_id=f.enrollment_id
-            AND f2.month=f.month
-            ORDER BY f2.id DESC
-            LIMIT 1) AS dues
-        FROM fee_records f
-        JOIN enrollments e 
-            ON e.id = f.enrollment_id
-        JOIN students_record sr
-            ON sr.id = e.student_id
-        WHERE e.class_name=? AND e.roll_number=?
-        GROUP BY e.roll_number, f.month
-        ORDER BY e.roll_number, f.month
+    sr.full_name,
+    e.roll_number,
+    f.month,
+    SUM(f.amount) AS total_paid,
+    e.total_fee,
+    last_dues.dues
+FROM fee_records f
+
+JOIN enrollments e 
+    ON e.id = f.enrollment_id
+
+JOIN students_record sr
+    ON sr.id = e.student_id
+
+JOIN (
+    SELECT 
+        enrollment_id,
+        month,
+        dues
+    FROM fee_records fr1
+    WHERE fr1.id = (
+        SELECT MAX(fr2.id)
+        FROM fee_records fr2
+        WHERE fr2.enrollment_id = fr1.enrollment_id
+        AND fr2.month = fr1.month
+    )
+) AS last_dues
+ON last_dues.enrollment_id = f.enrollment_id
+AND last_dues.month = f.month
+
+WHERE e.class_name = ?
+AND e.roll_number = ?
+
+GROUP BY 
+    sr.full_name,
+    e.roll_number,
+    f.month,
+    e.total_fee,
+    last_dues.dues
+
+ORDER BY f.month;
     """
         cursor.execute(query, (class_name, roll_number))
          
@@ -558,7 +580,7 @@ CREATE UNIQUE INDEX uq_active_class_roll
 
     
 if __name__=="__main__":
-    result = get_students(9)
+    result = fee_report({"class_name": "9", "roll_number": "124"})
     print(result)
 
 

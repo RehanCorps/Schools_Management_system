@@ -214,7 +214,7 @@ function renderStudents() {
     <td>${s.father_name}</td>
    
          <td>
-           <button type="button" class="card-btn" style="background: none; border: none;">
+           <button type="button" class="card-btn" style="background: none; border: none;" >
                     <img style="height: 25px; width: 25px; border-radius: 50%;" src="https://www.svgrepo.com/show/532387/user-search.svg" alt="">
            </button>
            </td>
@@ -225,8 +225,12 @@ function renderStudents() {
            </td>
     `;
 
+
+    // btn function 
     const displaycardbtn=row.querySelector(".card-btn");
     displaycardbtn.addEventListener("click",()=>{displaystudentcard(s)})
+    //
+
         tbody.appendChild(row);
     });
 
@@ -582,7 +586,6 @@ async function fetchstudentsfee() {
         }
 
         const responseData = await res.json();
-        console.log("Fee details response:", responseData);
 
         handle_response(responseData);
 
@@ -740,9 +743,6 @@ function renderStudentView(responseData) {
 
 function generalrenderforfee(responseData) {
 
-
-
-
     const table = document.getElementById("generalfeeTable");
     table.innerHTML = ""; // reset
 
@@ -803,16 +803,16 @@ function generalrenderforfee(responseData) {
         }
 
 
-        badge.classList.add("status-badge");
+        badge.classList.add("badge");
 
         if (status === "Paid") {
-            badge.classList.add("status-paid")
+            badge.classList.add("badge-green")
         }
         else if (status === "Due") {
-            badge.classList.add("status-due")
+            badge.classList.add("badge-red")
         }
         else {
-            badge.classList.add("status-partial")
+            badge.classList.add("badge-orange")
         }
 
         badge.textContent = status;
@@ -1031,6 +1031,152 @@ function closeCard(id) {
 
 function displaystudentcard(s){
 
+const data = s || {};
+
+document.getElementById("studentcard").style.display = "block";
+document.getElementById("studentcard").scrollIntoView({
+    behavior: "smooth"
+});
+
+document.getElementById("studentavatar").src = data.photo || "N/A";
+document.getElementById("studentname").textContent = data.full_name || "N/A";
+document.getElementById("studentclass").textContent ="Class:" + data.class_name || "N/A";
+document.getElementById("studentcontact").textContent = data.contact || "N/A";
+document.getElementById("studentaddress").textContent = data.address || "N/A";
+document.getElementById("studentroll").textContent = data.roll_number || "N/A";
+document.getElementById("studentsection").textContent = data.section || "N/A";
+document.getElementById("studentfather").textContent = data.father_name|| "N/A";
+document.getElementById("studentdob").textContent = data.dob|| "N/A";
+document.getElementById("studentgender").textContent = data.gender.toUpperCase()|| "N/A";
+document.getElementById("studentbform").textContent = data.b_form|| "N/A";
+document.getElementById("studentenrollmentdate").textContent = data.enrollment_number|| "N/A";
+document.getElementById("studentcontact").textContent = data.contact|| "N/A";
+
+
+
+const tabs = document.querySelectorAll(".tab-panel");
+
+const tabFunctions = {
+    "tab-transactions": function() {
+        console.log("Transactions tab active!");
+        const feedata={roll_number: data.roll_number, class_name: data.class_name};
+        fetchstudentsfeefortab(feedata)
+
+    },
+    "tab-attendance": function() {
+        console.log("Attendance tab active!");
+    },
+    "tab-results": function() {
+        console.log("Results tab active!");
+    },
+};
+
+tabs.forEach(tab => {
+    const observer = new MutationObserver(() => {
+        if (tab.classList.contains("active")) {
+            const func = tabFunctions[tab.id];
+            if (func) func();
+        }
+    });
+
+    observer.observe(tab, { attributes: true });
+});
+
+}
+
+// transaction tab function 
+
+async function fetchstudentsfeefortab(feedata) {
+
+    let payload = {};
+  
+    if (feedata.class_name) payload.class_name = feedata.class_name;
+    if (feedata.roll_number) payload.roll_number = feedata.roll_number;
+    if (feedata.month) payload.month = feedata.month;
+console.log("Fetching fee details for tab with payload:", payload);
+
+    try {
+        const url = "http://127.0.0.1:5000/allfeedetails";
+        const res = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        console.log("HTTP status:", res.status);
+
+        if (!res.ok) {
+            throw new Error(`Request failed with status ${res.status}`);
+        }
+
+        const responseData = await res.json();
+
+        tab_table(responseData);
+
+
+
+    } catch (err) {
+        console.error("Error fetching fee details:", err);
+        showToast("Unable to fetch fee details", "error");
+    }
+}
+
+function tab_table(responseData) {
+ const tbody = document.querySelector("#tab-fee-table tbody");
+    tbody.innerHTML = "";
+    
+    if (!responseData || responseData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6">No students found</td></tr>`;
+        return;
+    }
+    responseData.forEach((s) => {
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+    <td>${s.full_name || "N/A"}</td>
+    <td>${s.roll_number || "N/A"}</td>
+    <td>${s.month ? s.month.toUpperCase() : "N/A"}</td>
+    <td>${s.discount || "N/A"}</td>
+    <td style="color: green; font-weight: bold;">${s.total_paid || "N/A"}</td>
+    <td style="color: red; font-weight: bold;">${s.dues || "N/A"}</td>
+   
+         <td>
+           <button type="button" class="details-btn" style="background: none; border: none;" >
+                    <img style="height: 25px; width: 25px; border-radius: 50%;" src="https://www.svgrepo.com/show/532387/user-search.svg" alt="">
+           </button>
+           </td>
+    `;
+
+
+    // btn function 
+    const displaycardbtn=row.querySelector(".details-btn");
+    displaycardbtn.addEventListener("click",()=>{cardcheck(s)})
+    //
+
+        tbody.appendChild(row);
+    });  
+}
+
+function cardcheck(s){
+      showPage('feestablepage')
+      document.getElementById("feecard").style.display = "grid";
+      document.getElementById("feecard").scrollIntoView({
+        behavior: "smooth"
+      });
+      document.getElementById("feepagetable").style.display = "none";
+      
+    }
+
+
+// ===================
+
+function switchStudentTab(id, el) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  el.classList.add('active');
 }
 
 
